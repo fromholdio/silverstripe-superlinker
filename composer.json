@@ -1,0 +1,28 @@
+{
+    "name": "fromholdio/silverstripe-superlinker",
+    "type": "silverstripe-vendormodule",
+    "description": "Superlinker",
+    "license": "BSD-3-Clause",
+    "keywords": ["silverstripe", "link", "superlinker"],
+    "homepage": "https://github.com/fromholdio/silverstripe-superlinker",
+    "support": {
+        "issues": "https://github.com/fromholdio/silverstripe-superlinker/issues"
+    },
+    "authors": [{
+        "name": "Luke Fromhold",
+        "homepage": "https://fromhold.io"
+    }],
+    "require": {
+        "php": ">=5.6",
+        "silverstripe/vendor-plugin": "^1.0",
+        "silverstripe/cms": "^4.0",
+        "fromholdio/silverstripe-dependentgroupeddropdownfield": "^1.0.0",
+        "fromholdio/silverstripe-externalurlfield": "^1.0.3",
+        "fromholdio/silverstripe-globalanchors": "^1.0.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fromholdio\\SuperLinker\\": "src/"
+        }
+    }
+}
