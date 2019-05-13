@@ -17,8 +17,14 @@
         "silverstripe/vendor-plugin": "^1.0",
         "silverstripe/cms": "^4.0",
         "fromholdio/silverstripe-dependentgroupeddropdownfield": "^1.0.0",
-        "fromholdio/silverstripe-externalurlfield": "^1.0.3",
-        "fromholdio/silverstripe-globalanchors": "^1.0.1"
+        "fromholdio/silverstripe-externalurlfield": "^1.0.3"
+    },
+    "suggest": {
+        "fromholdio/silverstripe-dbhtmlanchors":  "",
+        "fromholdio/silverstripe-globalanchors": "",
+        "fromholdio/silverstripe-minigridfield": "",
+        "fromholdio/silverstripe-systemlinks": ""
+
     },
     "autoload": {
         "psr-4": {
