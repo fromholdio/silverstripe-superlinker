@@ -400,4 +400,9 @@ class SuperLink extends DataObject
         $this->extend('updateMultiAddTitle', $title);
         return $title;
     }
+
+    public function forTemplate()
+    {
+        return;
+    }
 }
