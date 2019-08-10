@@ -26,6 +26,7 @@ class SuperLink extends DataObject
     private static $allow_query_string = false;
 
     private static $enable_url_field_validation = true;
+    private static $enable_custom_link_text = true;
     private static $enable_tabs = false;
 
     private static $extensions = [
@@ -135,7 +136,7 @@ class SuperLink extends DataObject
 
     public function getLinkText()
     {
-        if ($this->CustomLinkText) {
+        if ($this->isCustomLinkTextEnabled() && $this->CustomLinkText) {
             $text = $this->CustomLinkText;
         } else {
             $text = $this->generateLinkText();
@@ -268,7 +269,14 @@ class SuperLink extends DataObject
     public function isURLFieldValidationEnabled()
     {
         $enabled = (bool) $this->config()->get('enable_url_field_validation');
-        $this->extend('updateIsURLFieldValidationEnabled');
+        $this->extend('updateIsURLFieldValidationEnabled', $enabled);
+        return $enabled;
+    }
+
+    public function isCustomLinkTextEnabled()
+    {
+        $enabled = (bool) $this->config()->get('enable_custom_link_text');
+        $this->extend('updateIsCustomLinkTextEnabled', $enabled);
         return $enabled;
     }
 
@@ -282,8 +290,14 @@ class SuperLink extends DataObject
             $fields->removeByName('QueryString');
             $fields->removeByName('Anchor');
 
-            $titleField = $fields->dataFieldByName('CustomLinkText');
-            $titleField->setDescription('Optional. Will be auto-generated if left blank.');
+            $customLinkTextEnabled = $this->isCustomLinkTextEnabled();
+            if ($customLinkTextEnabled) {
+                $titleField = $fields->dataFieldByName('CustomLinkText');
+                $titleField->setDescription('Optional. Will be auto-generated if left blank.');
+            }
+            else {
+                $fields->removeByName('CustomLinkText');
+            }
 
             if ($this->config()->get('enable_tabs')) {
 
@@ -299,12 +313,12 @@ class SuperLink extends DataObject
 
             } else {
 
-                foreach (array_reverse($this->getLinkFields()->toArray()) as $field) {
-                    $fields->insertAfter('CustomLinkText', $field);
+                foreach ($this->getLinkFields()->toArray() as $field) {
+                    $fields->push($field);
                 }
 
-                foreach (array_reverse($this->getBehaviourFields()->toArray()) as $field) {
-                    $fields->insertAfter('CustomLinkText', $field);
+                foreach ($this->getBehaviourFields()->toArray() as $field) {
+                    $fields->push($field);
                 }
             }
         });
