@@ -9,6 +9,8 @@ use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\Tab;
+use SilverStripe\Forms\TabSet;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationResult;
@@ -282,48 +284,78 @@ class SuperLink extends DataObject
 
     public function getCMSFields()
     {
-        $this->beforeUpdateCMSFields(function(FieldList $fields) {
+        $fields = FieldList::create(
+            $rootTabSet = TabSet::create('Root')
+        );
 
-            $fields->removeByName('URL');
-            $fields->removeByName('DoOpenNewWindow');
-            $fields->removeByName('DoNoFollow');
-            $fields->removeByName('QueryString');
-            $fields->removeByName('Anchor');
-
-            $customLinkTextEnabled = $this->isCustomLinkTextEnabled();
-            if ($customLinkTextEnabled) {
-                $titleField = $fields->dataFieldByName('CustomLinkText');
-                $titleField->setDescription('Optional. Will be auto-generated if left blank.');
+        $isCustomLinkTextEnabled = $this->isCustomLinkTextEnabled();
+        if ($isCustomLinkTextEnabled) {
+            $customLinkTextField = TextField::create(
+                'CustomLinkText',
+                $this->fieldLabel('CustomLinkText')
+            );
+            if (!$this->isInDB()) {
+                $customLinkTextField->setDescription('Optional. Will be auto-generated if left blank.');
             }
-            else {
-                $fields->removeByName('CustomLinkText');
+            if ($this->generateLinkText()) {
+                $customLinkTextField->setAttribute('placeholder', $this->generateLinkText());
             }
+        }
 
-            if ($this->config()->get('enable_tabs')) {
+        if ($this->config()->get('enable_tabs')) {
 
-                $fields->addFieldsToTab(
-                    'Root.LinkTarget',
-                    $this->getLinkFields()->toArray()
-                );
+            $mainTabSet = TabSet::create('Main');
 
-                $fields->addFieldsToTab(
-                    'Root.LinkBehaviour',
-                    $this->getBehaviourFields()->toArray()
-                );
-
-            } else {
-
-                foreach ($this->getLinkFields()->toArray() as $field) {
-                    $fields->push($field);
+            $linkFields = $this->getLinkFields()->toArray();
+            $hasLinkFields = ($linkFields && count($linkFields) > 0);
+            if ($hasLinkFields) {
+                $targetTab = Tab::create('SuperLinkTargetTab', 'Target');
+                if ($isCustomLinkTextEnabled) {
+                    $targetTab->push($customLinkTextField);
                 }
-
-                foreach ($this->getBehaviourFields()->toArray() as $field) {
-                    $fields->push($field);
+                foreach ($linkFields as $field) {
+                    $targetTab->push($field);
                 }
+                $mainTabSet->push($targetTab);
             }
-        });
 
-        $fields = parent::getCMSFields();
+            $behaviourFields = $this->getBehaviourFields()->toArray();
+            $hasBehaviourFields = ($behaviourFields && count($behaviourFields) > 0);
+            if ($hasBehaviourFields) {
+                $behaviourTab = Tab::create('SuperLinkBehaviourTab', 'Behaviour');
+                if (!$hasBehaviourFields && $isCustomLinkTextEnabled) {
+                    $behaviourTab->push($customLinkTextField);
+                }
+                foreach ($behaviourFields as $field) {
+                    $behaviourTab->push($field);
+                }
+                $mainTabSet->push($behaviourTab);
+            }
+
+            if ($hasLinkFields || $hasBehaviourFields) {
+                $rootTabSet->push($mainTabSet);
+            }
+        }
+        else {
+
+            $mainTab = Tab::create('Main');
+
+            if ($isCustomLinkTextEnabled) {
+                $mainTab->push($customLinkTextField);
+            }
+
+            foreach ($this->getLinkFields()->toArray() as $field) {
+                $mainTab->push($field);
+            }
+
+            foreach ($this->getBehaviourFields()->toArray() as $field) {
+                $mainTab->push($field);
+            }
+
+            $rootTabSet->push($mainTab);
+        }
+
+        $this->extend('updateCMSFields', $fields);
         return $fields;
     }
 
@@ -341,9 +373,18 @@ class SuperLink extends DataObject
     {
         $fields = FieldList::create(
             FieldGroup::create(
-                'Behaviour',
-                CheckboxField::create('DoOpenNewWindow', $this->fieldLabel('DoOpenNewWindow')),
-                CheckboxField::create('DoNoFollow', $this->fieldLabel('DoNoFollow'))
+                'New Window',
+                CheckboxField::create(
+                    'DoOpenNewWindow',
+                    $this->fieldLabel('DoOpenNewWindow')
+                )
+            ),
+            FieldGroup::create(
+                'SEO',
+                CheckboxField::create(
+                    'DoNoFollow',
+                    $this->fieldLabel('DoNoFollow')
+                )
             )
         );
         $this->extend('updateBehaviourFields', $fields);
