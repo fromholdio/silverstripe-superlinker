@@ -2,9 +2,11 @@
 
 namespace Fromholdio\SuperLinker\Model;
 
+use Fromholdio\GlobalAnchors\GlobalAnchors;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Convert;
+use SilverStripe\Core\Manifest\ModuleLoader;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
@@ -454,6 +456,20 @@ class SuperLink extends DataObject
         $title = $this->config()->get('multi_add_title');
         $this->extend('updateMultiAddTitle', $title);
         return $title;
+    }
+
+    public function getGlobalAnchors()
+    {
+        $anchors = null;
+
+        $isGlobalAnchorsEnabled = ModuleLoader::inst()
+            ->getManifest()
+            ->moduleExists('fromholdio/silverstripe-globalanchors');
+        if ($isGlobalAnchorsEnabled) {
+            $anchors = GlobalAnchors::get_anchors();
+        }
+        $this->extend('updateGlobalAnchors', $anchors);
+        return $anchors;
     }
 
     public function forTemplate()

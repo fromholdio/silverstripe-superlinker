@@ -31,11 +31,7 @@ class SiteTreeLink extends DataExtension
 
     public function updateLinkFields(FieldList &$fields)
     {
-        if ($this->owner->hasMethod('getGlobalAnchors')) {
-            $globalAnchors = $this->owner->getGlobalAnchors();
-        } else {
-            $globalAnchors = null;
-        }
+        $globalAnchors = $this->getOwner()->getGlobalAnchors();
 
         $anchorSource = function($siteTreeID) use ($globalAnchors) {
 
