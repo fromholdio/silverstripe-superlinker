@@ -87,8 +87,8 @@ class SiteTreeLink extends DataExtension
     {
         $link = Controller::join_links(
             $this->owner->SiteTree()->Link(),
-            $queryString,
-            $anchor
+            $queryString ? '?' . $queryString : null,
+            $anchor ? '#' . $anchor : null
         );
     }
 
@@ -96,8 +96,8 @@ class SiteTreeLink extends DataExtension
     {
         $link = Controller::join_links(
             $this->owner->SiteTree()->AbsoluteLink(),
-            $queryString,
-            $anchor
+            $queryString ? '?' . $queryString : null,
+            $anchor ? '#' . $anchor : null
         );
     }
 

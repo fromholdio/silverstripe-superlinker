@@ -73,7 +73,11 @@ class SuperLink extends DataObject
             ? $this->Anchor
             : null;
 
-        $link = Controller::join_links($this->URL, $queryString, $anchor);
+        $link = Controller::join_links(
+            $this->URL,
+            $queryString ? '?' . $queryString : null,
+            $anchor ? '#' . $anchor : null
+        );
 
         $this->extend('updateLink', $link, $queryString, $anchor);
         return $link;
@@ -97,7 +101,11 @@ class SuperLink extends DataObject
             $absoluteURL = Director::absoluteURL($url);
         }
 
-        $link = Controller::join_links($absoluteURL, $queryString, $anchor);
+        $link = Controller::join_links(
+            $absoluteURL,
+            $queryString ? '?' . $queryString : null,
+            $anchor ? '#' . $anchor : null
+        );
 
         $this->extend('updateAbsoluteLink', $link, $queryString, $anchor);
         return $link;
