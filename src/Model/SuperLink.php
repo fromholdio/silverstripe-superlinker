@@ -480,6 +480,14 @@ class SuperLink extends DataObject
         return $anchors;
     }
 
+    public function getGlobalAnchor($key)
+    {
+        $anchors = $this->getGlobalAnchors();
+        if (!$anchors) return null;
+        if (!isset($anchors[$key])) return null;
+        return $anchors[$key];
+    }
+
     public function forTemplate()
     {
         return;

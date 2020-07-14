@@ -3,8 +3,10 @@
 namespace Fromholdio\SuperLinker\Extensions;
 
 use Fromholdio\SuperLinker\Model\SuperLink;
+use Fromholdio\SystemLinks\SystemLinks;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Manifest\ModuleLoader;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataExtension;
@@ -97,8 +99,13 @@ class SystemLink extends DataExtension
     public function getSystemLinks()
     {
         $sourceClass = $this->owner->config()->get('system_links_source_class');
-
-        $links = Config::inst()->get($sourceClass, 'system_links');
+        $exists = ModuleLoader::inst()->getManifest()
+            ->moduleExists('fromholdio/silverstripe-systemlinks');
+        if ($exists || $sourceClass === SystemLinks::class) {
+            $links = SystemLinks::get_raw_links();
+        } else {
+            $links = Config::inst()->get($sourceClass, 'system_links');
+        }
 
         if ($this->owner->hasMethod('updateSystemLinks')) {
             $links = $this->owner->updateSystemLinks($links);
