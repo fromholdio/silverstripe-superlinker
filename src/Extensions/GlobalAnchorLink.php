@@ -45,6 +45,12 @@ class GlobalAnchorLink extends DataExtension
         $text = $this->owner->getGlobalAnchor($this->owner->Anchor);
     }
 
+    public function updateHasTarget(&$hasTarget)
+    {
+        $anchor = $this->owner->getGlobalAnchor($this->owner->Anchor);
+        $hasTarget = $anchor && !empty($anchor);
+    }
+
     public function updateIsSiteURL(bool &$isSiteURL)
     {
         $isSiteURL = true;

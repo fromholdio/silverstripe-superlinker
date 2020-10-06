@@ -67,6 +67,12 @@ class SystemLink extends DataExtension
         }
     }
 
+    public function updateHasTarget(&$hasTarget)
+    {
+        $link = $this->owner->getSystemLink($this->owner->Key);
+        $hasTarget = isset($link['url']);
+    }
+
     public function updateIsSiteURL(bool &$isSiteURL)
     {
         $isSiteURL = true;

@@ -49,6 +49,12 @@ class EmailLink extends DataExtension
         $text = $this->owner->Email;
     }
 
+    public function updateHasTarget(&$hasTarget)
+    {
+        $email = $this->getOwner()->Email;
+        $hasTarget = $email && !empty($email);
+    }
+
     public function updateIsSiteURL(bool &$isSiteURL)
     {
         $isSiteURL = true;

@@ -146,6 +146,14 @@ class SuperLink extends DataObject
         return $hasLink;
     }
 
+    public function HasTarget()
+    {
+        $url = $this->URL;
+        $hasTarget = $url && !empty($url);
+        $this->extend('updateHasTarget', $hasTarget);
+        return $hasTarget;
+    }
+
     public function getLinkText()
     {
         if ($this->isCustomLinkTextEnabled() && $this->CustomLinkText) {

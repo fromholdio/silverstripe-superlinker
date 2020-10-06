@@ -48,6 +48,12 @@ class NoLink extends DataExtension
         $text = '- No Link -';
     }
 
+    public function updateHasTarget(&$hasTarget)
+    {
+        $text = $this->getOwner()->Title;
+        $hasTarget = $text && !empty($text);
+    }
+
     public function updateIsSiteURL(bool &$isSiteURL)
     {
         $isSiteURL = false;

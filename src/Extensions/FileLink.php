@@ -21,10 +21,6 @@ class FileLink extends DataExtension
         'File'      =>  File::class
     ];
 
-    private static $owns = [
-        'File'
-    ];
-
     public function updateLinkFields(FieldList &$fields)
     {
         $fields = FieldList::create(
@@ -56,6 +52,12 @@ class FileLink extends DataExtension
     public function updateGenerateLinkText(&$text)
     {
         $text = $this->owner->File()->Title;
+    }
+
+    public function updateHasTarget(&$hasTarget)
+    {
+        $target = $this->getOwner()->File();
+        $hasTarget = $target && $target->exists();
     }
 
     public function updateLink(&$link)

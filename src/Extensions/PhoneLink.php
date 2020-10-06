@@ -53,6 +53,12 @@ class PhoneLink extends DataExtension
         $text = $phoneUtil->format($phone, PhoneNumberFormat::E164);
     }
 
+    public function updateHasTarget(&$hasTarget)
+    {
+        $phone = $this->getOwner()->Phone;
+        $hasTarget = $phone && !empty($phone);
+    }
+
     public function updateIsSiteURL(bool &$isSiteURL)
     {
         $isSiteURL = true;

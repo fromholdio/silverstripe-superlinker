@@ -25,10 +25,6 @@ class SiteTreeLink extends DataExtension
         'SiteTree'      =>  SiteTree::class
     ];
 
-    private static $owns = [
-        'SiteTree'
-    ];
-
     public function updateLinkFields(FieldList &$fields)
     {
         $globalAnchors = $this->getOwner()->getGlobalAnchors();
@@ -104,6 +100,12 @@ class SiteTreeLink extends DataExtension
     public function updateLinkTarget(&$target)
     {
         $target = $this->owner->SiteTree();
+    }
+
+    public function updateHasTarget(&$hasTarget)
+    {
+        $target = $this->getOwner()->SiteTree();
+        $hasTarget = $target && $target->exists();
     }
 
     public function updateLinkOrCurrent(&$linkOrCurrent)
