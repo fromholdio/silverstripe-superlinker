@@ -105,7 +105,7 @@ class SiteTreeLink extends DataExtension
     public function updateHasTarget(&$hasTarget)
     {
         $target = $this->getOwner()->SiteTree();
-        $hasTarget = $target && $target->exists();
+        $hasTarget = $target && $target->exists() && $target->canView();
     }
 
     public function updateLinkOrCurrent(&$linkOrCurrent)

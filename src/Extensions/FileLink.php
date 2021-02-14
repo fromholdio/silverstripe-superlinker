@@ -57,7 +57,7 @@ class FileLink extends DataExtension
     public function updateHasTarget(&$hasTarget)
     {
         $target = $this->getOwner()->File();
-        $hasTarget = $target && $target->exists();
+        $hasTarget = $target && $target->exists() && $target->canView();
     }
 
     public function updateLink(&$link)
