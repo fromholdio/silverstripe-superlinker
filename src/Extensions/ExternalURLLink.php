@@ -15,16 +15,21 @@ class ExternalURLLink extends DataExtension
 
     private static $multi_add_title = 'External URL';
 
+    private static $allow_query_string = true;
+    private static $allow_anchor = true;
+
     public function updateLinkFields(FieldList &$fields)
     {
+        $this->getOwner()->URL = $this->getOwner()->AbsoluteLink();
+
         $fields->replaceField(
             'URL',
             $urlField = ExternalURLField::create('URL', $this->owner->fieldLabel('URL'))
         );
 
         $urlField->setConfig('removeparts', [
-            'query'     =>  $this->owner->isQueryStringAllowed(),
-            'fragment'  =>  $this->owner->isAnchorAllowed()
+            'query'     =>  !$this->owner->isQueryStringAllowed(),
+            'fragment'  =>  !$this->owner->isAnchorAllowed()
         ]);
     }
 
@@ -33,15 +38,5 @@ class ExternalURLLink extends DataExtension
         if (!Director::is_absolute_url($this->owner->URL)) {
             $result->addFieldError('URL', 'External URLs must be complete including http:// or https://');
         }
-    }
-
-    public function updateLink(&$link)
-    {
-        $link = $this->owner->URL;
-    }
-
-    public function updateAbsoluteLink(&$link)
-    {
-        $link = $this->owner->URL;
     }
 }
