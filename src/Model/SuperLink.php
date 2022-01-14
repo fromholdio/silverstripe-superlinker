@@ -438,7 +438,7 @@ class SuperLink extends DataObject
 
         if (isset($parts['query'])) {
             if ($this->isQueryStringAllowed()) {
-                $this->QueryString = $parts['fragment'];
+                $this->QueryString = $parts['query'];
             }
             unset($parts['query']);
         }
