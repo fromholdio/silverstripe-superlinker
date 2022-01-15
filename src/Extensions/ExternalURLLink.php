@@ -20,7 +20,9 @@ class ExternalURLLink extends DataExtension
 
     public function updateLinkFields(FieldList &$fields)
     {
-        $this->getOwner()->URL = $this->getOwner()->AbsoluteLink();
+        if (!empty($this->getOwner()->Link())) {
+            $this->getOwner()->URL = $this->getOwner()->AbsoluteLink();
+        }
 
         $fields->replaceField(
             'URL',
