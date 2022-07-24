@@ -41,4 +41,14 @@ class ExternalURLLink extends DataExtension
             $result->addFieldError('URL', 'External URLs must be complete including http:// or https://');
         }
     }
+
+    public function updateLink(&$link)
+    {
+        $link = $this->getOwner()->URL;
+    }
+
+    public function updateAbsoluteLink(&$link)
+    {
+        $link = $this->getOwner()->URL;
+    }
 }
