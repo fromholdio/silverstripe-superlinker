@@ -17,7 +17,8 @@
         "silverstripe/vendor-plugin": "^1.0",
         "silverstripe/cms": "^4.0",
         "fromholdio/silverstripe-dependentgroupeddropdownfield": "^1.0.0",
-        "fromholdio/silverstripe-externalurlfield": "^1.0.3"
+        "fromholdio/silverstripe-externalurlfield": "^1.0.3",
+		"giggsey/libphonenumber-for-php": "^8.12.55"
     },
     "suggest": {
         "fromholdio/silverstripe-dbhtmlanchors":  "",
