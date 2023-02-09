@@ -39,13 +39,13 @@ class NoLink extends DataExtension
     public function updateValidate(ValidationResult &$result)
     {
         if (!$this->getOwner()->Title) {
-            $result->addFieldError('Title', 'You must provide a Title');
+            $result->addFieldError('Title', _t(__CLASS__.'.TitleRequired', 'You must provide a Title'));
         }
     }
 
     public function updateGenerateLinkText(&$text)
     {
-        $text = '- No Link -';
+        $text = _t(__CLASS__.'.NoLink', '- No Link -');
     }
 
     public function updateHasTarget(&$hasTarget)

@@ -1,0 +1,43 @@
+de:
+  Fromholdio\SuperLinker\Extensions\EmailLink:
+    Body: Inhalt
+    Email: Email
+    EmailBCC: BCC
+    EmailCC: CC
+    MustProvideEmail: 'Sie müssen eine E-Mail-Adresse angeben'
+    Subject: Betreff
+  Fromholdio\SuperLinker\Extensions\ExternalURLLink:
+    ExternalURLMustBeComplete: 'Externe URLs müssen vollständig sein, einschließlich http:// oder https://'
+    URL: URL
+  Fromholdio\SuperLinker\Extensions\FileLink:
+    File: Datei
+    FileRequired: 'Sie müssen eine Datei hochladen oder auswählen, auf die Sie verlinken möchten'
+  Fromholdio\SuperLinker\Extensions\GlobalAnchorLink:
+    Anchor: Anker
+    AnchorRequired: 'Sie müssen einen Anker auswählen'
+  Fromholdio\SuperLinker\Extensions\NoLink:
+    NoLink: '- Kein Link -'
+    TitleRequired: 'Sie müssen einen Titel angeben'
+  Fromholdio\SuperLinker\Extensions\PhoneLink:
+    Phone: Telefonnummer
+    PhoneRequired: 'Sie müssen eine Telefonnummer angeben'
+  Fromholdio\SuperLinker\Extensions\SiteTreeLink:
+    Anchor: Anker
+    Page: Seite
+    PageRequired: 'Sie müssen eine Seite auswählen, auf die Sie verlinken möchten'
+    SelectAPage: 'Seite auswählen'
+    SelectAnchor: 'Anker auswählen (optional)'
+  Fromholdio\SuperLinker\Extensions\SystemLink:
+    SystemLink: 'System-Link'
+    SystemLinkRequired: 'Sie müssen einen Systemlink auswählen'
+  Fromholdio\SuperLinker\Model\SuperLink:
+    CustomLinkText: 'Link Text'
+    DoNoFollow: 'Weisen Sie Suchmaschinen an, diesem Link nicht zu folgen'
+    DoOpenNewWindow: 'Link in neuem Fenster öffnen'
+    NewWindow: 'Neues Fenster'
+    OptionalWillBeGenerated: 'Optional. Wird automatisch generiert, wenn es leer gelassen wird.'
+    TabBehaviour: Verhalten
+    TabTarget: Ziel
+    URL: URL
+    URLInvalid: 'Sie müssen eine gültige URL angeben'
+    URLRequired: 'Sie müssen eine URL angeben'

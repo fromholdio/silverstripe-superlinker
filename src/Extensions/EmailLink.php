@@ -29,18 +29,18 @@ class EmailLink extends DataExtension
     public function updateLinkFields(FieldList &$fields)
     {
         $fields = FieldList::create(
-            EmailField::create('Email', $this->owner->fieldLabel('Email')),
-            EmailField::create('EmailCC', $this->owner->fieldLabel('EmailCC')),
-            EmailField::create('EmailBCC', $this->owner->fieldLabel('EmailBCC')),
-            TextField::create('Subject', $this->owner->fieldLabel('Subject')),
-            TextareaField::create('Body', $this->owner->fieldLabel('Body'))
+            EmailField::create('Email', _t(__CLASS__.'.Email', 'Email')),
+            EmailField::create('EmailCC', _t(__CLASS__.'.EmailCC', 'CC')),
+            EmailField::create('EmailBCC', _t(__CLASS__.'.EmailBCC', 'BCC')),
+            TextField::create('Subject', _t(__CLASS__.'.Subject', 'Subject')),
+            TextareaField::create('Body', _t(__CLASS__.'.Body', 'Body'))
         );
     }
 
     public function updateValidate(ValidationResult &$result)
     {
         if (!$this->owner->Email) {
-            $result->addFieldError('Email', 'You must provide an Email Address');
+            $result->addFieldError('Email', _t(__CLASS__.'.MustProvideEmail', 'You must provide an Email Address'));
         }
     }
 

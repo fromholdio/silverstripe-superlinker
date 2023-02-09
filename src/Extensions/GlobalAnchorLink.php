@@ -27,7 +27,7 @@ class GlobalAnchorLink extends DataExtension
         $fields = FieldList::create(
             DropdownField::create(
                 'Anchor',
-                $this->owner->fieldLabel('Anchor'),
+                _t(__CLASS__.'.Anchor', 'Anchor'),
                 $this->owner->getGlobalAnchors()
             )
         );
@@ -36,7 +36,7 @@ class GlobalAnchorLink extends DataExtension
     public function updateValidate(ValidationResult &$result)
     {
         if (!$this->owner->Anchor) {
-            $result->addFieldError('Anchor', 'You must select an anchor');
+            $result->addFieldError('Anchor', _t(__CLASS__.'.AnchorRequired', 'You must select an anchor'));
         }
     }
 
