@@ -93,7 +93,7 @@ class SuperLink extends DataObject
             ? $this->Anchor
             : null;
 
-        $url = $this->URL;
+        $url = $this->URL ?? '';
 
         if (Director::is_absolute_url($url)) {
             $absoluteURL = $url;
