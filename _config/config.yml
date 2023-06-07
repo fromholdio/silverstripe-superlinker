@@ -2,7 +2,7 @@
 Name: fromholdio-superlinker
 ---
 
-Fromholdio\SuperLinker\Model\DuperLink:
+Fromholdio\SuperLinker\Model\SuperLink:
   extensions:
     - 'Fromholdio\SuperLinker\Extensions\EmailLink'
     - 'Fromholdio\SuperLinker\Extensions\ExternalLink'
