@@ -16,7 +16,7 @@
         "silverstripe/cms": "~5.0",
         "fromholdio/silverstripe-dependentgroupeddropdownfield": "^2.0.0",
         "fromholdio/silverstripe-externalurlfield": "^1.1.0",
-        "giggsey/libphonenumber-for-php": "~8.12"
+        "innoweb/silverstripe-international-phone-number-field": "^5.0.0"
     },
     "suggest": {
         "fromholdio/silverstripe-dbhtmlanchors":  "",
