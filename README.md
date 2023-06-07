@@ -4,9 +4,39 @@ Use master/v2.x (compatible with SS 4 & 5).
 
 This branch is under active development. It **will** change and break.
 
+## CMS fields testing snippets
+
+```php
+// for $has_one relation, testing inline fields
+$linkFields = DuperLink::singleton()->getCMSLinkFields('SuperLink' . HasOneEdit::FIELD_SEPARATOR);
+$fields->addFieldsToTab('Root.Main', $linkFields->toArray());
+
+// for $has_one relation, testing with edit form
+$fields->addFieldsToTab('Root.Main', [
+    HasOneMiniGridField::create(
+        'SuperLink',
+        'SuperLink',
+        $this
+    )
+]);
+
+// for $has_many relation, testing with gridfield
+$linksField = MiniGridField::create(
+    'DuperLinks',
+    'Links',
+    $this
+)->setLimit(7)->setShowLimitMessage(true);
+$fields->addFieldToTab('Root.Main', $linksField);
+
+// for the HasOne/MiniGridFields, currently adding these lines provides nicer UI
+$config = $linksField->getGridConfig()?->addComponent(new GridField_ActionMenu());
+$linksField->setGridConfig($config);
+```
+
 ## v3 to-dos
 - Validations for each link type
 - Richer summary fields content
+- Update MiniGridField to use GridField_ActionMenu
 - Remove yml config currently in place for ease of development (convert to yml.example/readme or similar)
 - `DependentDropdownField`/`DependentGroupedDropdownField` no longer detect changes from `TreeDropdownField`, so the Anchors dropdown for `SiteTreeLink` is no longer working.
 - Modal for adding rather than `HasOneMiniGridField`
