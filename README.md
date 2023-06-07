@@ -6,6 +6,7 @@ This branch is under active development. It **will** change and break.
 
 ## v3 to-dos
 - Validations for each link type
+- Richer summary fields content
 - Remove yml config currently in place for ease of development (convert to yml.example/readme or similar)
 - `DependentDropdownField`/`DependentGroupedDropdownField` no longer detect changes from `TreeDropdownField`, so the Anchors dropdown for `SiteTreeLink` is no longer working.
 - Modal for adding rather than `HasOneMiniGridField`
