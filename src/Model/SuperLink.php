@@ -2,502 +2,713 @@
 
 namespace Fromholdio\SuperLinker\Model;
 
-use Fromholdio\GlobalAnchors\GlobalAnchors;
-use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
+use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Convert;
-use SilverStripe\Core\Manifest\ModuleLoader;
 use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\FormField;
+use SilverStripe\Forms\SingleSelectField;
 use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TabSet;
 use SilverStripe\Forms\TextField;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\ValidationResult;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\ORM\FieldType\DBHTMLText;
+use SilverStripe\ORM\SS_List;
+use SilverStripe\View\AttributesHTML;
+use UncleCheese\DisplayLogic\Forms\Wrapper;
 
 class SuperLink extends DataObject
 {
-    protected $attributes = [];
+    use AttributesHTML;
 
     private static $table_name = 'SuperLink';
     private static $singular_name = 'Link';
     private static $plural_name = 'Links';
 
-    private static $allow_anchor = false;
-    private static $allow_query_string = false;
+    private static $types = [];
+    private static $allowed_types = [];
+    private static $disallowed_types = [];
 
-    private static $enable_url_field_validation = true;
-    private static $enable_custom_link_text = true;
-    private static $enable_tabs = false;
-
-    private static $extensions = [
-        Versioned::class
+    private static $settings = [
+        'link_text' => true,
+        'open_in_new' => true,
+        'no_follow' => true
     ];
+
+    private static $linking_mode_default = 'link';
+    private static $linking_mode_section = 'section';
+    private static $linking_mode_current = 'current';
+
+    private static $link_type_field_class = DropdownField::class;
+    private static $link_type_attr_name = 'data-superlinker-type';
 
     private static $db = [
-        'URL'               =>  'Varchar(2083)',
-        'DoOpenNewWindow'   =>  'Boolean',
-        'DoNoFollow'        =>  'Boolean',
-        'Anchor'            =>  'Varchar(255)',
-        'QueryString'       =>  'Varchar(255)',
-        'CustomLinkText'    =>  'Varchar(2000)'
-    ];
-
-    private static $defaults = [
-        'DoOpenNewWindow'   =>  false,
-        'DoNoFollow'        =>  false
-    ];
-
-    private static $field_labels = [
-        'CustomLinkText'    =>  'Link text',
-        'DoOpenNewWindow'   =>  'Open link in a new window',
-        'DoNoFollow'        =>  'Instruct search engines not to follow this link'
+        'LinkText' => 'Varchar',
+        'LinkType' => 'Varchar(20)',
+        'DoOpenInNew' => 'Boolean',
+        'DoNoFollow' => 'Boolean'
     ];
 
     private static $casting = [
-        'Title'             =>  'Varchar',
-        'Href'              =>  'HTMLFragment',
-        'AttributesHTML'    =>  'HTMLFragment'
+        'AttributesHTML' => 'HTMLFragment',
+        'getAttributesHTML' => 'HTMLFragment',
     ];
 
-    public function Link()
+    private static $summary_fields = [
+        'Title',
+        'URL'
+    ];
+
+
+    /**
+     * Link text / title
+     * ----------------------------------------------------
+     */
+
+    public function getTitle(): string
     {
-        $queryString = ($this->isQueryStringAllowed() && $this->QueryString)
-            ? $this->QueryString
-            : null;
-
-        $anchor = ($this->isAnchorAllowed() && $this->Anchor)
-            ? $this->Anchor
-            : null;
-
-        $link = Controller::join_links(
-            $this->URL,
-            $queryString ? '?' . $queryString : null,
-            $anchor ? '#' . $anchor : null
-        );
-
-        $this->extend('updateLink', $link, $queryString, $anchor);
-        return $link;
-    }
-
-    public function AbsoluteLink()
-    {
-        $queryString = ($this->isQueryStringAllowed() && $this->QueryString)
-            ? $this->QueryString
-            : null;
-
-        $anchor = ($this->isAnchorAllowed() && $this->Anchor)
-            ? $this->Anchor
-            : null;
-
-        $url = $this->URL ?? '';
-
-        if (Director::is_absolute_url($url)) {
-            $absoluteURL = $url;
-        } else {
-            $absoluteURL = Director::absoluteURL($url);
+        if ($this->isLinkTextEnabled()) {
+            $title = $this->getField('LinkText');
+            $this->extend('updateTitle', $title);
         }
-
-        $link = Controller::join_links(
-            $absoluteURL,
-            $queryString ? '?' . $queryString : null,
-            $anchor ? '#' . $anchor : null
-        );
-
-        $this->extend('updateAbsoluteLink', $link, $queryString, $anchor);
-        return $link;
-    }
-
-    public function LinkOrCurrent()
-    {
-        $linkOrCurrent = null;
-        $this->extend('updateLinkOrCurrent', $linkOrCurrent);
-        return $linkOrCurrent;
-    }
-
-    public function LinkOrSection()
-    {
-        $linkOrSection = null;
-        $this->extend('updateLinkOrSection');
-        return $linkOrSection;
-    }
-
-    public function LinkingMode()
-    {
-        $linkingMode = null;
-        $this->extend('updateLinkingMode', $linkingMode);
-        return $linkingMode;
-    }
-
-    public function InSection($sectionName)
-    {
-        $inSection = null;
-        $this->extend('updateInSection', $inSection);
-        return $inSection;
-    }
-
-    public function HasLink()
-    {
-        $hasLink = true;
-        $this->extend('updateHasLink', $hasLink);
-        return $hasLink;
-    }
-
-    public function HasTarget()
-    {
-        $url = $this->URL;
-        $hasTarget = $url && !empty($url);
-        $this->extend('updateHasTarget', $hasTarget);
-        return $hasTarget;
-    }
-
-    public function getLinkText()
-    {
-        if ($this->isCustomLinkTextEnabled() && $this->CustomLinkText) {
-            $text = $this->CustomLinkText;
-        } else {
-            $text = $this->generateLinkText();
+        if (empty($title)) {
+            $title = $this->getDefaultTitle();
         }
-
-        $this->extend('updateLinkText', $text);
-        return $text;
-    }
-
-    public function getTitle()
-    {
-        if ($this->dbObject('Title') !== null) {
-            return $this->dbObject('Title');
-        }
-        $title = $this->getLinkText();
-        $this->extend('updateTitle', $title);
         return $title;
     }
 
-    public function generateLinkText()
+    public function getDefaultTitle(): string
     {
-        $text = $this->URL;
-        $this->extend('updateGenerateLinkText', $text);
-        return $text;
+        $title = null;
+        $this->extend('updateDefaultTitle', $title);
+        return empty($title)
+            ? $this->getTypeLabel() ?? 'Not configured'
+            : $title;
     }
 
-    public function getHref($forceAbsolute = false)
+    public function isLinkTextEnabled(?string $type = null): bool
     {
-        $href = ($forceAbsolute) ? $this->AbsoluteLink() : $this->Link();
-        $this->extend('updateHref', $href, $forceAbsolute);
+        if (empty($type)) $type = $this->getType();
+        return $this->isTypeSettingEnabled('link_text', $type);
+    }
+
+
+    /**
+     * Link health checks
+     * ----------------------------------------------------
+     */
+
+    public static function excludeInvalidLinks(SS_List $links): ArrayList
+    {
+        $list = ArrayList::create();
+        foreach ($links as $link) {
+            if ($link->isLinkValid()) $list->push($link);
+        }
+        return $list;
+    }
+
+    public function isLinkValid(): bool
+    {
+        $isValid = !empty($this->getType())
+            && $this->isTypeValid()
+            && $this->isTypeAvailable()
+            && !$this->isLinkOrphaned()
+            && !$this->isLinkEmpty();
+        $this->extend('updateIsLinkValid', $isValid);
+        return $isValid;
+    }
+
+    public function isLinkOrphaned(): bool
+    {
+//        $container = $this->getContainerObject();
+//        $isOrphaned = (bool) $container?->exists();
+        $isOrphaned = false;
+        $this->extend('updateIsLinkOrphaned', $isOrphaned);
+        return $isOrphaned;
+    }
+
+    public function isLinkEmpty(): bool
+    {
+        $isEmpty = empty($this->getURL());
+        $this->extend('updateIsLinkEmpty', $isEmpty);
+        return $isEmpty;
+    }
+
+
+    /**
+     * Link Types
+     * ----------------------------------------------------
+     */
+
+    public function getType(): ?string
+    {
+        return $this->getField('LinkType');
+    }
+
+    public function getTypeLabel(?string $type = null): ?string
+    {
+        if (empty($type)) $type = $this->getType();
+        if (empty($type)) return null;
+        return $this->getTypeConfigValue('label', $type);
+    }
+
+    protected function isTypeValid(?string $type = null): bool
+    {
+        if (empty($type)) $type = $this->getType();
+        if (empty($type)) return false;
+        return in_array($type, $this->getAllTypes());
+    }
+
+    protected function isTypeAvailable(?string $type = null): bool
+    {
+        if (empty($type)) $type = $this->getType();
+        if (empty($type)) return false;
+        return in_array($type, $this->getAvailableTypes());
+    }
+
+    protected function getAvailableTypes(bool $isLabelRequired = true): array
+    {
+        $availableTypes = [];
+        $allTypes = $this->getAllTypes();
+
+        $allowedTypes = $this->getAllowedTypes();
+        if (empty($allowedTypes)) {
+            $availableTypes = array_combine($allTypes, $allTypes);
+        }
+        else {
+            foreach ($allTypes as $allType) {
+                if (in_array($allType, $allowedTypes)) {
+                    $availableTypes[$allType] = $allType;
+                }
+            }
+        }
+
+        $disallowedTypes = $this->getDisallowedTypes();
+        if (!empty($disallowedTypes)) {
+            foreach ($disallowedTypes as $disallowedType) {
+                unset($availableTypes[$disallowedType]);
+            }
+        }
+
+        $this->extend('updateAvailableTypes', $availableTypes);
+
+        if ($isLabelRequired) {
+            foreach ($availableTypes as $availableType) {
+                if (empty($this->getTypeLabel($availableType))) {
+                    unset($availableTypes[$availableType]);
+                }
+            }
+        }
+
+        return array_values($availableTypes);
+    }
+
+    protected function getAllTypes(): array
+    {
+        $types = static::config()->get('types') ?? [];
+        $types = array_keys(array_filter($types));
+        return $this->doSortTypes($types);
+    }
+
+    protected function getAllowedTypes(): array
+    {
+        $types = static::config()->get('allowed_types') ?? [];
+        $this->extend('updateAllowedTypes', $types);
+        return $types;
+    }
+
+    protected function getDisallowedTypes(): array
+    {
+        $types = static::config()->get('disallowed_types') ?? [];
+        $this->extend('updateDisallowedTypes', $types);
+        return $types;
+    }
+
+    protected function doSortTypes(array $types): array
+    {
+        $sorterFn = function($typeA, $typeB) {
+            $sortA = $this->getTypeConfigValue('sort', $typeA);
+            $sortB = $this->getTypeConfigValue('sort', $typeB);
+            if ($sortA === $sortB) {
+                return 0;
+            }
+            return ($sortA < $sortB) ? -1 : 1;
+        };
+        usort($types, $sorterFn);
+        return $types;
+    }
+
+
+    /**
+     * Link element HTML attributes
+     * ----------------------------------------------------
+     */
+
+    public function getDefaultAttributes(): array
+    {
+        $attrs = [
+            'href' => $this->getHrefValue(),
+            'target' => $this->getTargetValue(),
+            'rel' => $this->getRelValue(),
+            'class' => $this->getClassValue()
+        ];
+        $type = $this->getType();
+        $typeAttrName = static::config()->get('link_type_attr_name');
+        if (!empty($typeAttrName)) {
+            $attrs[$typeAttrName] = Convert::raw2att($type);
+        }
+        $this->extend('updateDefaultAttributes', $attrs);
+        return array_filter($attrs);
+    }
+
+
+    /**
+     * URL / Href attr
+     * ----------------------------------------------------
+     */
+
+    public function getHrefValue(): ?string
+    {
+        $href = $this->getURL();
+        $this->extend('updateHrefValue', $href);
         return $href;
     }
 
-    public function setAttribute($name, $value)
+    public function getURL(): ?string
     {
-        $this->attributes[$name] = $value;
+        $url = null;
+        $this->extend('updateURL', $url);
+        return $url;
+    }
+
+    public function getAbsoluteURL(): ?string
+    {
+        $url = $this->getURL();
+        if (!empty($url) && Director::is_relative_url($url)) {
+            $url = Director::absoluteURL($url);
+        }
+        $this->extend('updateAbsoluteURL', $url);
+        return $url;
+    }
+
+
+    /**
+     * Target attr
+     * ----------------------------------------------------
+     */
+
+    public function getTargetValue(): ?string
+    {
+        $target = null;
+        if ($this->isOpenInNew()) {
+            $target = '_blank';
+        }
+        $this->extend('updateTargetValue', $target);
+        return $target;
+    }
+
+    public function isOpenInNewEnabled(?string $type = null): bool
+    {
+        if (empty($type)) $type = $this->getType();
+        return $this->isTypeSettingEnabled('open_in_new', $type);
+    }
+
+    public function isOpenInNew(): bool
+    {
+        $do = $this->isOpenInNewEnabled() && $this->getField('DoOpenInNew');
+        $this->extend('updateIsOpenInNew', $do);
+        return $do;
+    }
+
+
+    /**
+     * Rel attr
+     * ----------------------------------------------------
+     */
+
+    public function getRelValue(): ?string
+    {
+        $parts = $this->getRelValueParts();
+        return empty($parts) ? null : implode(' ', $parts);
+    }
+
+    protected function getRelValueParts(): array
+    {
+        $relParts = [];
+        if ($this->isNoFollow()) {
+            $relParts[] = 'nofollow';
+        }
+        if ($this->isNoOpener()) {
+            $relParts[] = 'noopener';
+        }
+        $this->extend('updateRelValueParts', $relParts);
+        return $relParts;
+    }
+
+    public function isNoFollowEnabled(?string $type = null): bool
+    {
+        if (empty($type)) $type = $this->getType();
+        return $this->isTypeSettingEnabled('no_follow', $type);
+    }
+
+    public function isNoFollow(): bool
+    {
+        $do = $this->isNoFollowEnabled() && $this->getField('DoNoFollow');
+        $this->extend('updateIsNoFollow', $do);
+        return $do;
+    }
+
+    public function isNoOpener(): bool
+    {
+        $url = $this->getURL();
+        $do = !empty($url) && !Director::is_site_url($url);
+        $this->extend('updateIsNoOpener', $do);
+        return $do;
+    }
+
+
+    /**
+     * Class attr
+     * ----------------------------------------------------
+     */
+
+    protected array $extraCSSClasses = [];
+
+    public function getClassValue(): ?string
+    {
+        $value = implode(' ', $this->extraCSSClasses);
+        $this->extend('updateClassValue', $value);
+        return $value;
+    }
+
+    public function addExtraCSSClass(string $class): self
+    {
+        $newClasses = explode(' ', $class);
+        foreach ($newClasses as $newClass) {
+            $this->extraCSSClasses[$newClass] = $newClass;
+        }
         return $this;
     }
 
-    public function getAttribute($name)
+    public function removeExtraCSSClass(string $class): self
     {
-        $attributes = $this->getAttributes();
-
-        if (isset($attributes[$name])) {
-            return $attributes[$name];
+        $removeClasses = explode(' ', $class);
+        foreach ($removeClasses as $removeClass) {
+            unset($this->extraCSSClasses[$removeClass]);
         }
-        return null;
+        return $this;
     }
 
-    public function getAttributes()
+
+    /**
+     * Template helpers
+     * ----------------------------------------------------
+     */
+
+    public function isCurrent(): bool
     {
-        $attributes = [];
-
-        $attributes['href'] = $this->getHref();
-
-        if (!$this->isSiteURL()) {
-            $attributes['rel'][] = 'noopener';
-        }
-
-        if ($this->DoOpenNewWindow) {
-            $attributes['target'] = '_blank';
-        }
-
-        if ($this->DoNoFollow) {
-            $attributes['rel'][] = 'nofollow';
-        }
-
-        $attributes = array_merge($attributes, $this->attributes);
-
-        $this->extend('updateAttributes', $attributes);
-        return $attributes;
+        $isCurrent = false;
+        $this->extend('updateIsCurrent', $isCurrent);
+        return $isCurrent;
     }
 
-    public function getAttributesHTML($excluded = null)
+    public function isSection(): bool
     {
-        $attributes = $this->getAttributes();
+        $isSection = false;
+        $this->extend('updateIsSection', $isSection);
+        return $isSection;
+    }
 
-        // Remove excluded
-        $excluded = (is_string($excluded)) ? func_get_args() : null;
-        if ($excluded) {
-            $attributes = array_diff_key($attributes, array_flip($excluded));
-        }
+    public function LinkOrCurrent(): string
+    {
+        return $this->isCurrent()
+            ? static::config()->get('linking_mode_current')
+            : static::config()->get('linking_mode_default');
+    }
 
-        // Create markup
-        $parts = [];
-        foreach ($attributes as $name => $value) {
+    public function LinkOrSection(): string
+    {
+        return $this->isSection()
+            ? static::config()->get('linking_mode_section')
+            : static::config()->get('linking_mode_default');
+    }
 
-            if ($value === null) continue;
+    public function LinkingMode(): string
+    {
+        return $this->isCurrent()
+            ? static::config()->get('linking_mode_current')
+            : $this->LinkOrSection();
+    }
 
-            if (is_array($value)) {
-                $partValue = implode(' ', $value);
-            } else if ($value === true) {
-                $partValue = false;
-            } else {
-                $partValue = $value;
+
+    /**
+     * Rendering
+     * ----------------------------------------------------
+     */
+
+    public function forTemplate(): DBHTMLText
+    {
+        $html = $this->isLinkValid()
+            ? $this->renderWith($this->getRenderTemplates())
+            : '';
+        $this->extend('updateForTemplate', $html);
+        return $html;
+    }
+
+    protected function getRenderTemplates(?string $suffix = null): array
+    {
+        $classes = ClassInfo::ancestry($this->getField('ClassName'));
+        $classes = array_reverse($classes);
+        $baseClass = self::class;
+
+        $type = $this->getType() ?? '';
+        if (!empty($type)) $type = '_' . $type;
+        $templates = [];
+        foreach ($classes as $key => $class) {
+            if (!empty($type)) {
+                $templates[$class][] = $class . $type . $suffix;
             }
-
-            $attribute = $name;
-            if ($partValue !== false) {
-                $attribute .= '="' . Convert::raw2att($partValue) . '"';
+            $templates[$class][] = $class . $suffix;
+            if ($class === $baseClass) {
+                break;
             }
-            $parts[] = $attribute;
         }
 
-        $this->extend('updateAttributesHTML', $parts, $attributes);
-        return implode(' ', $parts);
+        $this->extend('updateRenderTemplates', $templates, $suffix);
+        return $templates;
     }
 
-    public function isSiteURL()
+
+    /**
+     * Data processing and validation methods
+     * ----------------------------------------------------
+     */
+
+
+
+    /**
+     * Link Type config values & settings booleans
+     * ----------------------------------------------------
+     */
+
+    public function getTypeConfigValue(string $key, string $type): mixed
     {
-        $isSiteURL = Director::is_site_url($this->Link());
-        $this->extend('updateIsSiteURL', $isSiteURL);
-        return $isSiteURL;
+        return $this->getTypeConfigData($type)[$key] ?? null;
     }
 
-    public function isAnchorAllowed()
+    protected function getTypeConfigData(string $type): array
     {
-        $allowed = (bool) $this->config()->get('allow_anchor');
-        $this->extend('updateIsAnchorAllowed', $allowed);
-        return $allowed;
+        return static::config()->get('types')[$type] ?? [];
     }
 
-    public function isQueryStringAllowed()
+    public function isSettingEnabled(string $key): bool
     {
-        $allowed = (bool) $this->config()->get('allow_query_string');
-        $this->extend('updateIsQueryStringAllowed', $allowed);
-        return $allowed;
+        return static::config()->get('settings')[$key] ?? false;
     }
 
-    public function isURLFieldValidationEnabled()
+    public function isTypeSettingEnabled(string $key, ?string $type): bool
     {
-        $enabled = (bool) $this->config()->get('enable_url_field_validation');
-        $this->extend('updateIsURLFieldValidationEnabled', $enabled);
-        return $enabled;
+        $isEnabled = $this->isSettingEnabled($key);
+        if ($isEnabled && !empty($type)) {
+            $isTypeEnabled = $this->getTypeConfigValue('settings', $type)[$key] ?? null;
+            if ($isTypeEnabled === false) {
+                $isEnabled = false;
+            }
+        }
+        return $isEnabled;
     }
 
-    public function isCustomLinkTextEnabled()
+    protected function getTypesByEnabledSetting(string $key, bool $onlyAvailableTypes = true): array
     {
-        $enabled = (bool) $this->config()->get('enable_custom_link_text');
-        $this->extend('updateIsCustomLinkTextEnabled', $enabled);
-        return $enabled;
+        $resultTypes = [];
+        $types = $onlyAvailableTypes ? $this->getAvailableTypes() : $this->getAllTypes();
+        foreach ($types as $type) {
+            $resultTypes[$type] = $this->isTypeSettingEnabled($key, $type);
+        }
+        return array_keys(array_filter($resultTypes));
     }
 
-    public function getCMSFields()
+
+    /**
+     * CMS Fields
+     * ----------------------------------------------------
+     */
+
+    public function getCMSFields(): FieldList
     {
         $fields = FieldList::create(
-            $rootTabSet = TabSet::create('Root')
+            TabSet::create(
+                'Root',
+                $mainTab = Tab::create('Main')
+            )
         );
-
-        $isCustomLinkTextEnabled = $this->isCustomLinkTextEnabled();
-        if ($isCustomLinkTextEnabled) {
-            $customLinkTextField = TextField::create(
-                'CustomLinkText',
-                $this->fieldLabel('CustomLinkText')
-            );
-            if (!$this->isInDB()) {
-                $customLinkTextField->setDescription('Optional. Will be auto-generated if left blank.');
-            }
-            if ($this->generateLinkText()) {
-                $customLinkTextField->setAttribute('placeholder', $this->generateLinkText());
-            }
+        $mainFields = $this->getCMSLinkFields();
+        if ($mainFields->count() > 0) {
+            $mainTab->setChildren($mainFields);
         }
-
-        if ($this->config()->get('enable_tabs')) {
-
-            $mainTabSet = TabSet::create('Main');
-
-            $linkFields = $this->getLinkFields()->toArray();
-            $hasLinkFields = ($linkFields && count($linkFields) > 0);
-            if ($hasLinkFields) {
-                $targetTab = Tab::create('SuperLinkTargetTab', 'Target');
-                if ($isCustomLinkTextEnabled) {
-                    $targetTab->push($customLinkTextField);
-                }
-                foreach ($linkFields as $field) {
-                    $targetTab->push($field);
-                }
-                $mainTabSet->push($targetTab);
-            }
-
-            $behaviourFields = $this->getBehaviourFields()->toArray();
-            $hasBehaviourFields = ($behaviourFields && count($behaviourFields) > 0);
-            if ($hasBehaviourFields) {
-                $behaviourTab = Tab::create('SuperLinkBehaviourTab', 'Behaviour');
-                if (!$hasBehaviourFields && $isCustomLinkTextEnabled) {
-                    $behaviourTab->push($customLinkTextField);
-                }
-                foreach ($behaviourFields as $field) {
-                    $behaviourTab->push($field);
-                }
-                $mainTabSet->push($behaviourTab);
-            }
-
-            if ($hasLinkFields || $hasBehaviourFields) {
-                $rootTabSet->push($mainTabSet);
-            }
-        }
-        else {
-
-            $mainTab = Tab::create('Main');
-
-            if ($isCustomLinkTextEnabled) {
-                $mainTab->push($customLinkTextField);
-            }
-
-            foreach ($this->getLinkFields()->toArray() as $field) {
-                $mainTab->push($field);
-            }
-
-            foreach ($this->getBehaviourFields()->toArray() as $field) {
-                $mainTab->push($field);
-            }
-
-            $rootTabSet->push($mainTab);
-        }
-
         $this->extend('updateCMSFields', $fields);
         return $fields;
     }
 
-    public function getLinkFields()
+    public function getCMSLinkFields(string $fieldPrefix = ''): FieldList
     {
-        $fields = FieldList::create(
-            TextField::create('URL', $this->fieldLabel('URL'))
-        );
+        $fields = FieldList::create();
 
-        $this->extend('updateLinkFields', $fields);
+        $linkTypeField = $this->getLinkTypeField($fieldPrefix);
+        if (empty($linkTypeField)) return $fields;
+        $fields->push($linkTypeField);
+
+        $linkTextTypes = $this->getTypesByEnabledSetting('link_text');
+        if (!empty($linkTextTypes))
+        {
+            $linkTextField = TextField::create(
+                $fieldPrefix . 'LinkText',
+                $this->fieldLabel('LinkText')
+            );
+            $linkTextField->setDescription(
+                'Optional. Will be auto-generated from link if left blank.'
+            );
+            if ($this->isInDB()) {
+                $linkTextField->setAttribute(
+                    'placeholder',
+                    $this->getDefaultTitle()
+                );
+            }
+            $this->applySettingFieldDisplayLogic($linkTextField, $linkTextTypes, $fieldPrefix);
+            $fields->push($linkTextField);
+        }
+
+        $this->extend('updateCMSLinkFieldsBeforeTypes', $fields);
+
+        $types = $this->getAvailableTypes();
+        foreach ($types as $type) {
+            $typeFields = $this->getCMSLinkTypeFields($type, $fieldPrefix);
+            if ($typeFields->count() < 1) continue;
+            $typeWrapper = Wrapper::create($typeFields);
+            $typeWrapper->setName($fieldPrefix . 'TypeWrapper_' . $type);
+            $typeWrapper->hideUnless($fieldPrefix. 'LinkType')->isEqualTo($type);
+            $fields->push($typeWrapper);
+        }
+
+        $optionsGroup = FieldGroup::create();
+        $optionsGroup->setTitle($this->fieldLabel('OptionsGroup'));
+        $optionsGroup->setName($fieldPrefix . 'OptionsGroup');
+        $optionsGroupTypes = [];
+
+        $this->extend('updateCMSLinkFieldsAfterTypes', $fields);
+
+        $openNewTypes = $this->getTypesByEnabledSetting('open_in_new');
+        if (!empty($openNewTypes))
+        {
+            $openNewField = CheckboxField::create(
+                $fieldPrefix . 'DoOpenInNew',
+                $this->fieldLabel('DoOpenInNew')
+            );
+            $this->applySettingFieldDisplayLogic(
+                $openNewField,
+                $openNewTypes,
+                $fieldPrefix
+            );
+            $optionsGroup->push($openNewField);
+            $optionsGroupTypes += $openNewTypes;
+        }
+
+        $noFollowTypes = $this->getTypesByEnabledSetting('no_follow');
+        if (!empty($noFollowTypes))
+        {
+            $noFollowField = CheckboxField::create(
+                $fieldPrefix . 'DoNoFollow',
+                $this->fieldLabel('DoNoFollow')
+            );
+            $this->applySettingFieldDisplayLogic(
+                $noFollowField,
+                $noFollowTypes,
+                $fieldPrefix
+            );
+            $optionsGroup->push($noFollowField);
+            $optionsGroupTypes += $noFollowTypes;
+        }
+
+        if ($optionsGroup->FieldList()->count() > 0)
+        {
+            $optionsGroupWrapper = Wrapper::create($optionsGroup);
+            $this->applySettingFieldDisplayLogic(
+                $optionsGroupWrapper,
+                $optionsGroupTypes,
+                $fieldPrefix
+            );
+            $fields->push($optionsGroupWrapper);
+        }
+
+        $this->extend('updateCMSLinkFields', $fields, $fieldPrefix);
         return $fields;
     }
 
-    public function getBehaviourFields()
+    protected function getCMSLinkTypeFields(string $type, string $fieldPrefix = ''): FieldList
     {
-        $fields = FieldList::create(
-            FieldGroup::create(
-                'New Window',
-                CheckboxField::create(
-                    'DoOpenNewWindow',
-                    $this->fieldLabel('DoOpenNewWindow')
-                )
-            ),
-            FieldGroup::create(
-                'SEO',
-                CheckboxField::create(
-                    'DoNoFollow',
-                    $this->fieldLabel('DoNoFollow')
-                )
-            )
-        );
-        $this->extend('updateBehaviourFields', $fields);
+        $fields = FieldList::create();
+        $this->extend('updateCMSLinkTypeFields', $fields, $type, $fieldPrefix);
         return $fields;
     }
 
-    public function validate()
+    protected function getLinkTypeField(string $fieldPrefix = ''): ?SingleSelectField
     {
-        $result = ValidationResult::create();
-
-        if ($this->isURLFieldValidationEnabled()) {
-            if (!$this->URL) {
-                $result->addFieldError('URL', 'You must provide a URL');
-            } else if (!filter_var($this->URL, FILTER_VALIDATE_URL)) {
-                $result->addFieldError('URL', 'You must provide a valid URL');
+        $field = null;
+        $class = $this->getLinkTypeFieldClassName();
+        if (is_a($class, SingleSelectField::class, true))
+        {
+            $source = [];
+            $types = $this->getAvailableTypes();
+            foreach ($types as $type) {
+                $source[$type] = $this->getTypeLabel($type);
+            }
+            $this->extend('updateLinkTypeFieldSource', $source);
+            if (!empty($source))
+            {
+                $field = $class::create(
+                    $fieldPrefix . 'LinkType',
+                    $this->fieldLabel('LinkType'),
+                    $source
+                );
+                if (is_a($class, DropdownField::class, true))
+                {
+                    $field->setHasEmptyDefault(true);
+                    $field->setEmptyString('-- Select link type --');
+                }
             }
         }
-
-        $this->extend('updateValidate', $result);
-        return $result;
+        $this->extend('updateLinkTypeField', $field, $class, $source, $fieldPrefix);
+        return $field;
     }
 
-    public function saveURL($value)
+    protected function getLinkTypeFieldClassName(): string
     {
-        $parts = parse_url($value);
+        $class = static::config()->get('link_type_field_class');
+        $this->extend('updateLinkTypeFieldClassName', $class);
+        return $class;
+    }
 
-        if (isset($parts['fragment'])) {
-            if ($this->isAnchorAllowed()) {
-                $this->Anchor = $parts['fragment'];
-            }
-            unset($parts['fragment']);
+    protected function applySettingFieldDisplayLogic(
+        FormField $field,
+        array $types,
+        string $fieldPrefix = ''
+    ): void
+    {
+        foreach ($types as $type) {
+            $criteria = empty($criteria)
+                ? $field->displayIf($fieldPrefix . 'LinkType')->isEqualTo($type)
+                : $criteria->orIf($fieldPrefix . 'LinkType')->isEqualTo($type);
         }
-
-        if (isset($parts['query'])) {
-            if ($this->isQueryStringAllowed()) {
-                $this->QueryString = $parts['query'];
-            }
-            unset($parts['query']);
-        }
-
-        $this->URL = rtrim(http_build_url($parts), '/');
-
-        $this->extend('updateSaveURL', $value);
+        if (!empty($criteria)) $criteria->end();
     }
 
-    public function onBeforeWrite()
-    {
-        parent::onBeforeWrite();
 
-        if (!$this->isAnchorAllowed()) {
-            $this->Anchor = null;
-        }
-        if (!$this->isQueryStringAllowed()) {
-            $this->QueryString = null;
-        }
-    }
-
-    public function getLinkTarget()
-    {
-        $target = $this->dbObject('URL');
-        $this->extend('updateLinkTarget', $target);
-        return $target;
-    }
-
-    public function getMultiAddTitle()
-    {
-        $title = $this->config()->get('multi_add_title');
-        $this->extend('updateMultiAddTitle', $title);
-        return $title;
-    }
-
-    public function getGlobalAnchors()
-    {
-        $anchors = null;
-
-        $isGlobalAnchorsEnabled = ModuleLoader::inst()
-            ->getManifest()
-            ->moduleExists('fromholdio/silverstripe-globalanchors');
-        if ($isGlobalAnchorsEnabled) {
-            $anchors = GlobalAnchors::get_anchors();
-        }
-        $this->extend('updateGlobalAnchors', $anchors);
-        return $anchors;
-    }
-
-    public function getGlobalAnchor($key)
-    {
-        $anchors = $this->getGlobalAnchors();
-        if (!$anchors) return null;
-        if (!isset($anchors[$key])) return null;
-        return $anchors[$key];
-    }
-
-    public function forTemplate()
-    {
-        return;
-    }
+    /**
+     * Permissions
+     * ----------------------------------------------------
+     */
 }

@@ -2,96 +2,50 @@
 
 namespace Fromholdio\SuperLinker\Extensions;
 
-use libphonenumber\PhoneNumberFormat;
-use libphonenumber\PhoneNumberUtil;
+use Innoweb\InternationalPhoneNumberField\Forms\InternationalPhoneNumberField;
+use Innoweb\InternationalPhoneNumberField\ORM\DBPhone;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\DataExtension;
-use SilverStripe\ORM\ValidationResult;
 
-class PhoneLink extends DataExtension
+class PhoneLink extends SuperLinkTypeExtension
 {
-    private static $singular_name = 'Phone Link';
-    private static $plural_nbame = 'Phone Links';
+    private static $extension_link_type = 'phone';
 
-    private static $multi_add_title = 'Phone number';
-
-    private static $enable_url_field_validation = false;
-
-    private static $default_country = 'AU';
-
-    private static $db = [
-        'Phone'     =>  'Varchar(30)'
+    private static $types = [
+        'phone' => [
+            'label' => 'Phone number',
+            'settings' => [
+                'open_in_new' => false,
+                'no_follow' => false
+            ]
+        ]
     ];
 
-    public function updateLinkFields(FieldList &$fields)
+    private static $db = [
+        'PhoneNumber' => 'Phone'
+    ];
+
+    public function updateDefaultTitle(?string &$title): void
     {
-        $fields = FieldList::create(
-            TextField::create('Phone', $this->owner->fieldLabel('Phone'))
-        );
+        if (!$this->isLinkTypeMatch()) return;
+        /** @var DBPhone $phoneField */
+        $phoneField = $this->getOwner()->dbObject('PhoneNumber');
+        $title = $phoneField->International();
     }
 
-    public function updateValidate(ValidationResult &$result)
+    public function updateURL(?string &$url): void
     {
-        if (!$this->owner->Phone) {
-            $result->addFieldError('Phone', 'You must provide a phone number');
-        }
+        if (!$this->isLinkTypeMatch()) return;
+        /** @var DBPhone $phoneField */
+        $phoneField = $this->getOwner()->dbObject('PhoneNumber');
+        $phoneNumber = $phoneField->URL();
+        $url = empty($phoneNumber) ? null : $phoneNumber;
     }
 
-    public function updateGenerateLinkText(&$text)
+    public function updateCMSLinkTypeFields(FieldList $fields, string $type, string $fieldPrefix): void
     {
-        if (!$this->owner->Phone) {
-            return null;
-        }
-
-        $phoneUtil = PhoneNumberUtil::getInstance();
-        $phone = $phoneUtil->parse(
-            $this->owner->Phone,
-            $this->owner->getDefaultCountry()
-        );
-
-        $text = $phoneUtil->format($phone, PhoneNumberFormat::E164);
-    }
-
-    public function updateHasTarget(&$hasTarget)
-    {
-        $phone = $this->getOwner()->Phone;
-        $hasTarget = $phone && !empty($phone);
-    }
-
-    public function updateIsSiteURL(bool &$isSiteURL)
-    {
-        $isSiteURL = true;
-    }
-
-    public function updateLink(&$link)
-    {
-        if (!$this->owner->Phone) {
-            $link = null;
-            return;
-        }
-
-        $phoneUtil = PhoneNumberUtil::getInstance();
-        $phone = $phoneUtil->parse(
-            $this->owner->Phone,
-            $this->owner->getDefaultCountry()
-        );
-
-        $link = $phoneUtil->format($phone, PhoneNumberFormat::RFC3966);
-    }
-
-    public function updateAbsoluteLink(&$link)
-    {
-        $link = $this->owner->Link();
-    }
-
-    public function updateLinkTarget(&$target)
-    {
-        $target = $this->owner->dbObject('Phone');
-    }
-
-    public function getDefaultCountry()
-    {
-        return $this->owner->config()->get('default_country');
+        if (!$this->isLinkTypeMatch($type)) return;
+        $fields->push(InternationalPhoneNumberField::create(
+            $fieldPrefix . 'PhoneNumber'
+        ));
     }
 }

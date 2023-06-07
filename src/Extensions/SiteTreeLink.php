@@ -3,140 +3,121 @@
 namespace Fromholdio\SuperLinker\Extensions;
 
 use Fromholdio\DependentGroupedDropdownField\Forms\DependentGroupedDropdownField;
+use Fromholdio\GlobalAnchors\GlobalAnchors;
 use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Control\Controller;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TreeDropdownField;
-use SilverStripe\ORM\DataExtension;
-use SilverStripe\ORM\ValidationResult;
 
-class SiteTreeLink extends DataExtension
+class SiteTreeLink extends SuperLinkTypeExtension
 {
-    private static $singular_name = 'Site Tree Link';
-    private static $plural_name = 'Site Tree Links';
+    private static $extension_link_type = 'sitetree';
 
-    private static $multi_add_title = 'Page on this website';
-
-    private static $allow_anchor = true;
-
-    private static $enable_url_field_validation = false;
-
-    private static $has_one = [
-        'SiteTree'      =>  SiteTree::class
+    private static $types = [
+        'sitetree' => [
+            'label' => 'Page on this website',
+            'settings' => [
+                'no_follow' => false
+            ]
+        ]
     ];
 
-    public function updateLinkFields(FieldList &$fields)
+    private static $db = [
+        'SiteTreeAnchor' => 'Varchar(255)'
+    ];
+
+    private static $has_one = [
+        'SiteTree' => SiteTree::class
+    ];
+
+    public function getLinkedSiteTree(): ?SiteTree
     {
-        $globalAnchors = $this->getOwner()->getGlobalAnchors();
+        if (!$this->isLinkTypeMatch()) return null;
+        /** @var ?SiteTree $siteTree */
+        $siteTree = $this->getOwner()->getComponent('SiteTree');
+        return $siteTree?->exists() ? $siteTree : null;
+    }
 
-        $anchorSource = function($siteTreeID) use ($globalAnchors) {
+    public function getLinkedSiteTreeAnchor(): ?string
+    {
+        if (!$this->isLinkTypeMatch()) return null;
+        return $this->getOwner()->getField('SiteTreeAnchor');
+    }
 
-            $anchors = [];
+    public function getAvailableSiteTreeAnchors(int|string|null $siteTreeID): array
+    {
+        $anchors = [];
 
-            $siteTree = SiteTree::get()->byID($siteTreeID);
-            if ($siteTree && $siteTree->exists()) {
-                $contentAnchors = $siteTree->dbObject('Content')->getAnchors();
-                if ($contentAnchors) {
-                    $anchors['Page Content'] = $contentAnchors;
-                }
-            }
+        /** @var ?SiteTree $siteTree */
+        $siteTree = SiteTree::get()->find('ID', $siteTreeID ?? -1);
 
-            if ($globalAnchors && !empty($globalAnchors)) {
-                $anchors['Global Template'] = $globalAnchors;
-            }
+        $contentAnchors = $siteTree?->getAnchorsOnPage();
+        $this->getOwner()->invokeWithExtensions(
+            'updateAvailableSiteTreeContentAnchors',
+            $contentAnchors, $siteTree
+        );
+        if (!empty($contentAnchors)) {
+            $anchors['Page content'] = array_combine($contentAnchors, $contentAnchors);
+        }
 
-            return $anchors;
+        $globalAnchors = GlobalAnchors::get_anchors();
+        if (!empty($globalAnchors)) {
+            $anchors['Global anchors'] = $globalAnchors;
+        }
+
+        $this->getOwner()->invokeWithExtensions(
+            'updateAvailableSiteTreeAnchors',
+            $anchors, $siteTree
+        );
+        return $anchors;
+    }
+
+    public function updateDefaultTitle(?string &$title): void
+    {
+        if (!$this->isLinkTypeMatch()) return;
+        $title = $this->getOwner()->getLinkedSiteTree()?->getTitle();
+    }
+
+    public function updateURL(?string &$url): void
+    {
+        if (!$this->isLinkTypeMatch()) return;
+        $url = $this->getOwner()->getLinkedSiteTree()?->Link();
+        $anchor = $this->getOwner()->getLinkedSiteTreeAnchor();
+        if (!empty($anchor)) $url .= '#' . $anchor;
+    }
+
+    public function updateAbsoluteURL(?string &$url): void
+    {
+        if (!$this->isLinkTypeMatch()) return;
+        $url = $this->getOwner()->getLinkedSiteTree()?->AbsoluteLink();
+    }
+
+    public function updateCMSLinkTypeFields(FieldList $fields, string $type, string $fieldPrefix): void
+    {
+        if (!$this->isLinkTypeMatch($type)) return;
+
+        $siteTreeField = TreeDropdownField::create(
+            'SiteTreeID',
+            $this->getOwner()->fieldLabel('SiteTree'),
+            SiteTree::class
+        );
+        $siteTreeField->setEmptyString('-- Select a page --');
+        $siteTreeField->setHasEmptyDefault(true);
+        $fields->push($siteTreeField);
+
+        $siteTreeLink = $this->getOwner();
+        $anchorSource = function(int|string|null $siteTreeID) use ($siteTreeLink) {
+            return $siteTreeLink->getAvailableSiteTreeAnchors($siteTreeID);
         };
 
-        $fields = FieldList::create(
-            $siteTreeField = TreeDropdownField::create(
-                'SiteTreeID',
-                $this->owner->fieldLabel('SiteTree'),
-                SiteTree::class
-            )
-                ->setEmptyString('Select a page')
-                ->setHasEmptyDefault(true)
-            ,
-            DependentGroupedDropdownField::create(
-                'Anchor',
-                $this->owner->fieldLabel('Anchor'),
-                $anchorSource
-            )
-                ->setDepends($siteTreeField)
-                ->setEmptyString('Select an anchor (optional)')
+        $anchorField = DependentGroupedDropdownField::create(
+            'SiteTreeAnchor',
+            $this->getOwner()->fieldLabel('SiteTreeAnchor'),
+            $anchorSource
         );
-    }
-
-    public function updateValidate(ValidationResult &$result)
-    {
-        if (!$this->owner->SiteTreeID) {
-            $result->addFieldError('SiteTreeID', 'You must select a page to link to');
-        }
-    }
-
-    public function updateGenerateLinkText(&$text)
-    {
-        $text = $this->owner->SiteTree()->Title;
-    }
-
-    public function updateLink(&$link, &$queryString, &$anchor)
-    {
-        $link = Controller::join_links(
-            $this->owner->SiteTree()->Link(),
-            $queryString ? '?' . $queryString : null,
-            $anchor ? '#' . $anchor : null
-        );
-    }
-
-    public function updateAbsoluteLink(&$link, &$queryString, &$anchor)
-    {
-        $link = Controller::join_links(
-            $this->owner->SiteTree()->AbsoluteLink(),
-            $queryString ? '?' . $queryString : null,
-            $anchor ? '#' . $anchor : null
-        );
-    }
-
-    public function updateLinkTarget(&$target)
-    {
-        $target = $this->owner->SiteTree();
-    }
-
-    public function updateHasTarget(&$hasTarget)
-    {
-        $target = $this->getOwner()->SiteTree();
-        $hasTarget = $target && $target->exists() && $target->canView();
-    }
-
-    public function updateLinkOrCurrent(&$linkOrCurrent)
-    {
-        $siteTree = $this->getOwner()->SiteTree();
-        if ($siteTree) {
-            $linkOrCurrent = $siteTree->LinkOrCurrent();
-        }
-    }
-
-    public function updateLinkOrSection(&$linkOrSection)
-    {
-        $siteTree = $this->getOwner()->SiteTree();
-        if ($siteTree) {
-            $linkOrSection = $siteTree->LinkOrSection();
-        }
-    }
-
-    public function updateLinkingMode(&$linkingMode)
-    {
-        $siteTree = $this->getOwner()->SiteTree();
-        if ($siteTree) {
-            $linkingMode = $siteTree->LinkingMode();
-        }
-    }
-
-    public function updateInSection(&$inSection)
-    {
-        $siteTree = $this->getOwner()->SiteTree();
-        if ($siteTree) {
-            $inSection = $siteTree->InSection();
-        }
+        $anchorField
+            ->setDepends($siteTreeField)
+            ->setEmptyString('Select an anchor (optional)');
+        $fields->push($anchorField);
     }
 }

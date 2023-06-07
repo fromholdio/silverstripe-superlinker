@@ -1,3 +1,33 @@
 ---
 Name: fromholdio-superlinker
 ---
+
+Fromholdio\SuperLinker\Model\DuperLink:
+  extensions:
+    - 'Fromholdio\SuperLinker\Extensions\EmailLink'
+    - 'Fromholdio\SuperLinker\Extensions\ExternalLink'
+    - 'Fromholdio\SuperLinker\Extensions\FileLink'
+    - 'Fromholdio\SuperLinker\Extensions\GlobalAnchorLink'
+    - 'Fromholdio\SuperLinker\Extensions\NullLink'
+    - 'Fromholdio\SuperLinker\Extensions\PhoneLink'
+    - 'Fromholdio\SuperLinker\Extensions\SiteTreeLink'
+    - 'Fromholdio\SuperLinker\Extensions\SystemLink'
+  disallowed_types:
+    - nolink
+  types:
+    email:
+      sort: 2
+    external:
+      sort: 3
+    phone:
+      sort: 4
+    nolink:
+      sort: 5
+    globalanchor:
+      sort: 7
+    system:
+      sort: 6
+    sitetree:
+      sort: 0
+    file:
+      sort: 1

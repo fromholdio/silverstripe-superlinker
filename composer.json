@@ -13,10 +13,10 @@
         "homepage": "https://fromhold.io"
     }],
     "require": {
-        "silverstripe/cms": "~4.0 || ~5.0",
-        "fromholdio/silverstripe-dependentgroupeddropdownfield": "^1.0.0 || ^2.0.0",
-        "fromholdio/silverstripe-externalurlfield": "^1.0.3",
-        "giggsey/libphonenumber-for-php": "^8.12.55"
+        "silverstripe/cms": "~5.0",
+        "fromholdio/silverstripe-dependentgroupeddropdownfield": "^2.0.0",
+        "fromholdio/silverstripe-externalurlfield": "^1.1.0",
+        "giggsey/libphonenumber-for-php": "~8.12"
     },
     "suggest": {
         "fromholdio/silverstripe-dbhtmlanchors":  "",
