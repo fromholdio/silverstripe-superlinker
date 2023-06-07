@@ -8,7 +8,7 @@ This branch is under active development. It **will** change and break.
 
 ```php
 // for $has_one relation, testing inline fields
-$linkFields = DuperLink::singleton()->getCMSLinkFields('SuperLink' . HasOneEdit::FIELD_SEPARATOR);
+$linkFields = SuperLink::singleton()->getCMSLinkFields('SuperLink' . HasOneEdit::FIELD_SEPARATOR);
 $fields->addFieldsToTab('Root.Main', $linkFields->toArray());
 
 // for $has_one relation, testing with edit form
@@ -22,7 +22,7 @@ $fields->addFieldsToTab('Root.Main', [
 
 // for $has_many relation, testing with gridfield
 $linksField = MiniGridField::create(
-    'DuperLinks',
+    'SuperLinks',
     'Links',
     $this
 )->setLimit(7)->setShowLimitMessage(true);
