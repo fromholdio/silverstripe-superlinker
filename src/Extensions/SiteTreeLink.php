@@ -16,6 +16,7 @@ class SiteTreeLink extends SuperLinkTypeExtension
     private static $types = [
         'sitetree' => [
             'label' => 'Page on this website',
+            'allow_anchor' => true,
             'settings' => [
                 'no_follow' => false
             ]
@@ -97,7 +98,7 @@ class SiteTreeLink extends SuperLinkTypeExtension
         if (!$this->isLinkTypeMatch($type)) return;
 
         $siteTreeField = TreeDropdownField::create(
-            'SiteTreeID',
+            $fieldPrefix . 'SiteTreeID',
             $this->getOwner()->fieldLabel('SiteTree'),
             SiteTree::class
         );
@@ -105,13 +106,17 @@ class SiteTreeLink extends SuperLinkTypeExtension
         $siteTreeField->setHasEmptyDefault(true);
         $fields->push($siteTreeField);
 
+        if (!$this->getOwner()->isTypeSettingEnabled('allow_anchor', $type)) {
+            return;
+        }
+
         $siteTreeLink = $this->getOwner();
         $anchorSource = function(int|string|null $siteTreeID) use ($siteTreeLink) {
             return $siteTreeLink->getAvailableSiteTreeAnchors($siteTreeID);
         };
 
         $anchorField = DependentGroupedDropdownField::create(
-            'SiteTreeAnchor',
+            $fieldPrefix . 'SiteTreeAnchor',
             $this->getOwner()->fieldLabel('SiteTreeAnchor'),
             $anchorSource
         );
