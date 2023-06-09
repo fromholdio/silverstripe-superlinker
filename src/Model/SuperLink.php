@@ -58,11 +58,6 @@ class SuperLink extends DataObject
         'getAttributesHTML' => 'HTMLFragment',
     ];
 
-    private static $summary_fields = [
-        'Title',
-        'URL'
-    ];
-
 
     /**
      * Link text / title
@@ -540,16 +535,18 @@ class SuperLink extends DataObject
 
     public function getCMSFields(): FieldList
     {
+        $linkFieldsWrapper = Wrapper::create(
+            $this->getCMSLinkFields()
+        );
+        $linkFieldsWrapper->setName('LinkMainFieldsWrapper');
+
         $fields = FieldList::create(
             TabSet::create(
                 'Root',
-                $mainTab = Tab::create('Main')
+                Tab::create('Main', $linkFieldsWrapper)
             )
         );
-        $mainFields = $this->getCMSLinkFields();
-        if ($mainFields->count() > 0) {
-            $mainTab->setChildren($mainFields);
-        }
+
         $this->extend('updateCMSFields', $fields);
         return $fields;
     }
