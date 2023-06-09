@@ -19,6 +19,7 @@ class FileLink extends SuperLinkTypeExtension
             'use_upload_field' => false,
             'allow_uploads' => false,
             'starting_folder_path' => '',
+            'allow_force_download' => true,
             'settings' => [
                 'no_follow' => false
             ]
@@ -126,6 +127,10 @@ class FileLink extends SuperLinkTypeExtension
             }
         }
         $fields->push($fileField);
+
+        if (!$this->getOwner()->isTypeSettingEnabled('allow_force_download', $type)) {
+            return;
+        }
 
         $doForceDownloadField = DropdownField::create(
             'DoForceDownload',
