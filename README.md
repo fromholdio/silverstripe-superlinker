@@ -2,7 +2,7 @@
 
 Use master/v2.x (compatible with SS 4 & 5).
 
-This branch is under active development. It **will** change and break.
+This branch is under active development. It **will** change and break, likely including namespaces.
 
 ## CMS fields testing snippets
 
