@@ -579,7 +579,7 @@ class SuperLink extends DataObject
             $fields->push($linkTextField);
         }
 
-        $this->extend('updateCMSLinkFieldsBeforeTypes', $fields);
+        $this->extend('updateCMSLinkFieldsBeforeTypes', $fields, $fieldPrefix);
 
         $types = $this->getAvailableTypes();
         foreach ($types as $type) {
@@ -596,7 +596,7 @@ class SuperLink extends DataObject
         $optionsGroup->setName($fieldPrefix . 'OptionsGroup');
         $optionsGroupTypes = [];
 
-        $this->extend('updateCMSLinkFieldsAfterTypes', $fields);
+        $this->extend('updateCMSLinkFieldsAfterTypes', $fields, $fieldPrefix);
 
         $openNewTypes = $this->getTypesByEnabledSetting('open_in_new');
         if (!empty($openNewTypes))
