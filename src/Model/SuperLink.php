@@ -495,7 +495,7 @@ class SuperLink extends DataObject
         return $this->getTypeConfigData($type)[$key] ?? null;
     }
 
-    protected function getTypeConfigData(string $type): array
+    public function getTypeConfigData(string $type): array
     {
         return static::config()->get('types')[$type] ?? [];
     }
@@ -517,7 +517,7 @@ class SuperLink extends DataObject
         return $isEnabled;
     }
 
-    protected function getTypesByEnabledSetting(string $key, bool $onlyAvailableTypes = true): array
+    public function getTypesByEnabledSetting(string $key, bool $onlyAvailableTypes = true): array
     {
         $resultTypes = [];
         $types = $onlyAvailableTypes ? $this->getAvailableTypes() : $this->getAllTypes();
