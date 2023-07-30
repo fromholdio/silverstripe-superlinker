@@ -689,7 +689,7 @@ class SuperLink extends DataObject
         return $class;
     }
 
-    protected function applySettingFieldDisplayLogic(
+    public function applySettingFieldDisplayLogic(
         FormField $field,
         array $types,
         string $fieldPrefix = ''
