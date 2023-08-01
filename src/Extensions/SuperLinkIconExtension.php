@@ -3,6 +3,7 @@
 namespace Fromholdio\SuperLinker\Extensions;
 
 use Fromholdio\SuperLinker\Model\SuperLink;
+use Fromholdio\SuperLinker\Model\VersionedSuperLink;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\FieldList;
@@ -65,7 +66,10 @@ class SuperLinkIconExtension extends DataExtension
     }
 
 
-    public function getOwner(): SuperLink
+    /**
+     * @return SuperLink|VersionedSuperLink
+     */
+    public function getOwner()
     {
         /** @var SuperLink $owner */
         $owner = parent::getOwner();

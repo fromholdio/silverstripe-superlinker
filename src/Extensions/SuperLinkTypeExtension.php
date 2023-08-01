@@ -3,6 +3,7 @@
 namespace Fromholdio\SuperLinker\Extensions;
 
 use Fromholdio\SuperLinker\Model\SuperLink;
+use Fromholdio\SuperLinker\Model\VersionedSuperLink;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\FormField;
@@ -93,7 +94,10 @@ class SuperLinkTypeExtension extends DataExtension
     }
 
 
-    public function getOwner(): SuperLink
+    /**
+     * @return SuperLink|VersionedSuperLink
+     */
+    public function getOwner()
     {
         /** @var SuperLink $owner */
         $owner = parent::getOwner();
