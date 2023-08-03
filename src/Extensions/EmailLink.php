@@ -34,6 +34,14 @@ class EmailLink extends SuperLinkTypeExtension
         'EmailBody' => 'Text'
     ];
 
+    private static $field_labels = [
+        'Email' => 'Email',
+        'EmailCC' => 'CC',
+        'EmailBCC' => 'BCC',
+        'EmailSubject' => 'Subject',
+        'EmailBody' => 'Body'
+    ];
+
     public function updateDefaultTitle(?string &$title): void
     {
         if (!$this->isLinkTypeMatch()) return;
@@ -68,8 +76,8 @@ class EmailLink extends SuperLinkTypeExtension
     public function updateCMSLinkTypeFields(FieldList $fields, string $type, string $fieldPrefix): void
     {
         if (!$this->isLinkTypeMatch($type)) return;
-        $fields->push(EmailField::create($fieldPrefix . 'Email'));
-        $fields->push(TextField::create($fieldPrefix . 'EmailSubject'));
-        $fields->push(TextareaField::create($fieldPrefix . 'EmailBody'));
+        $fields->push(EmailField::create($fieldPrefix . 'Email', $this->getOwner()->fieldLabel('Email')));
+        $fields->push(TextField::create($fieldPrefix . 'EmailSubject', $this->getOwner()->fieldLabel('EmailSubject')));
+        $fields->push(TextareaField::create($fieldPrefix . 'EmailBody', $this->getOwner()->fieldLabel('EmailBody')));
     }
 }

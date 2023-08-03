@@ -31,6 +31,10 @@ class SuperLinkIconExtension extends DataExtension
         'LinkIcon'
     ];
 
+    private static $field_labels = [
+        'LinkIcon' => 'Icon'
+    ];
+
     public function getIcon(): ?Image
     {
         if (!$this->getOwner()->isSettingEnabled('icon')) return null;
@@ -40,12 +44,12 @@ class SuperLinkIconExtension extends DataExtension
         return $icon?->exists() ? $icon : null;
     }
 
-    public function updateCMSLinkFieldsBeforeTypes(FieldList $fields): void
+    public function updateCMSLinkFieldsBeforeTypes(FieldList $fields, string $fieldPrefix): void
     {
         if (!$this->getOwner()->isSettingEnabled('icon')) return;
 
         $iconField = UploadField::create(
-            'LinkIcon',
+            $fieldPrefix . 'LinkIcon',
             $this->getOwner()->fieldLabel('LinkIcon')
         );
         $folderPath = $this->getOwner()->config()->get('icon_folder_path');

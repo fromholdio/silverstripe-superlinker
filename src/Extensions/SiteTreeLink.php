@@ -31,6 +31,11 @@ class SiteTreeLink extends SuperLinkTypeExtension
         'SiteTree' => SiteTree::class
     ];
 
+    private static $field_labels = [
+        'SiteTree' => 'Page on this website',
+        'SiteTreeAnchor' => 'Page anchor'
+    ];
+
     public function getLinkedSiteTree(): ?SiteTree
     {
         if (!$this->isLinkTypeMatch()) return null;

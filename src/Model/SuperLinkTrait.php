@@ -55,6 +55,14 @@ trait SuperLinkTrait
         'DoNoFollow' => 'Boolean'
     ];
 
+    private static $field_labels = [
+        'LinkText' => 'Text',
+        'LinkType' => 'Type',
+        'OptionsGroup' => 'Options',
+        'DoOpenInNew' => 'Open in new tab',
+        'DoNoFollow' => 'Ask search engines to ignore'
+    ];
+
     private static $casting = [
         'AttributesHTML' => 'HTMLFragment',
         'getAttributesHTML' => 'HTMLFragment',

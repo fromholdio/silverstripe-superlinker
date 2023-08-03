@@ -38,6 +38,11 @@ class FileLink extends SuperLinkTypeExtension
         'File'
     ];
 
+    private static $field_labels = [
+        'File' => 'File',
+        'DoForceDownload' => 'Behaviour'
+    ];
+
     public function getLinkedFile(): ?File
     {
         if (!$this->isLinkTypeMatch()) return null;
@@ -92,7 +97,7 @@ class FileLink extends SuperLinkTypeExtension
         if ($this->getOwner()->getTypeConfigValue('use_upload_field', $type))
         {
             $fileField = UploadField::create(
-                'File',
+                $fieldPrefix . 'File',
                 $this->getOwner()->fieldLabel('File')
             );
             if (!$this->getOwner()->getTypeConfigValue('allow_uploads', $type)) {
@@ -104,7 +109,7 @@ class FileLink extends SuperLinkTypeExtension
         }
         else {
             $fileField = TreeDropdownField::create(
-                'FileID',
+                $fieldPrefix . 'FileID',
                 $this->getOwner()->fieldLabel('File'),
                 File::class,
                 'ID',
@@ -133,9 +138,8 @@ class FileLink extends SuperLinkTypeExtension
         }
 
         $doForceDownloadField = DropdownField::create(
-            'DoForceDownload',
-            'Display mode',
-            //$this->getOwner()->fieldLabel('DoForceDownload'),
+            $fieldPrefix . 'DoForceDownload',
+            $this->getOwner()->fieldLabel('DoForceDownload'),
             [
                 1 => 'Download file directly to user\'s device',
                 0 => 'Display file in browser window (when possible)'
