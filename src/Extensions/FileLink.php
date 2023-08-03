@@ -133,7 +133,7 @@ class FileLink extends SuperLinkTypeExtension
         }
         $fields->push($fileField);
 
-        if (!$this->getOwner()->isTypeSettingEnabled('allow_force_download', $type)) {
+        if (!$this->getOwner()->getTypeConfigValue('allow_force_download', $type)) {
             return;
         }
 
