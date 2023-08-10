@@ -122,7 +122,7 @@ class SiteTreeLink extends SuperLinkTypeExtension
             $siteTreeField->setTreeBaseID($siteTreeRoot->getField('ID'));
         }
 
-        if (!$this->getOwner()->isTypeSettingEnabled('allow_anchor', $type)) {
+        if (!$this->getOwner()->getTypeConfigValue('allow_anchor', $type)) {
             return;
         }
 
