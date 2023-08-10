@@ -6,7 +6,6 @@ use Fromholdio\DependentGroupedDropdownField\Forms\DependentGroupedDropdownField
 use Fromholdio\GlobalAnchors\GlobalAnchors;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TreeDropdownField;
 
 class SiteTreeLink extends SuperLinkTypeExtension
@@ -98,6 +97,13 @@ class SiteTreeLink extends SuperLinkTypeExtension
         $url = $this->getOwner()->getLinkedSiteTree()?->AbsoluteLink();
     }
 
+    public function getAllowedLinkedSiteTreeRoot(): ?SiteTree
+    {
+        $siteTree = null;
+        $this->getOwner()->invokeWithExtensions('updateAllowedLinkedSiteTreeRoot', $siteTree);
+        return $siteTree;
+    }
+
     public function updateCMSLinkTypeFields(FieldList $fields, string $type, string $fieldPrefix): void
     {
         if (!$this->isLinkTypeMatch($type)) return;
@@ -110,6 +116,11 @@ class SiteTreeLink extends SuperLinkTypeExtension
         $siteTreeField->setEmptyString('-- Select a page --');
         $siteTreeField->setHasEmptyDefault(true);
         $fields->push($siteTreeField);
+
+        $siteTreeRoot = $this->getOwner()->getAllowedLinkedSiteTreeRoot();
+        if (!is_null($siteTreeRoot)) {
+            $siteTreeField->setTreeBaseID($siteTreeRoot->getField('ID'));
+        }
 
         if (!$this->getOwner()->isTypeSettingEnabled('allow_anchor', $type)) {
             return;
