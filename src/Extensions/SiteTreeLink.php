@@ -77,6 +77,22 @@ class SiteTreeLink extends SuperLinkTypeExtension
         return $anchors;
     }
 
+    public function updateIsCurrent(bool $value): void
+    {
+        if (!$this->isLinkTypeMatch()) return;
+        $siteTree = $this->getOwner()->getLinkedSiteTree();
+        if (!$siteTree) return;
+        $value = $siteTree->isCurrent();
+    }
+
+    public function updateIsSection(bool $value): void
+    {
+        if (!$this->isLinkTypeMatch()) return;
+        $siteTree = $this->getOwner()->getLinkedSiteTree();
+        if (!$siteTree) return;
+        $value = $siteTree->isSection();
+    }
+
     public function updateDefaultTitle(?string &$title): void
     {
         if (!$this->isLinkTypeMatch()) return;
