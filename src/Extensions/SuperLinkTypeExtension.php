@@ -45,15 +45,15 @@ class SuperLinkTypeExtension extends DataExtension
 
     public function updateRelValueParts(?array $parts): void {}
 
-    public function updateIsNoFollow(bool $value): void {}
+    public function updateIsNoFollow(bool &$value): void {}
 
-    public function updateIsNoOpener(bool $value): void {}
+    public function updateIsNoOpener(bool &$value): void {}
 
     public function updateClassValue(string &$value): void {}
 
-    public function updateIsCurrent(bool $value): void {}
+    public function updateIsCurrent(bool &$value): void {}
 
-    public function updateIsSection(bool $value): void {}
+    public function updateIsSection(bool &$value): void {}
 
     public function updateForTemplate(string|DBHTMLText|null &$html): void {}
 

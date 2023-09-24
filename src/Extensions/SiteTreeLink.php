@@ -77,7 +77,7 @@ class SiteTreeLink extends SuperLinkTypeExtension
         return $anchors;
     }
 
-    public function updateIsCurrent(bool $value): void
+    public function updateIsCurrent(bool &$value): void
     {
         if (!$this->isLinkTypeMatch()) return;
         $siteTree = $this->getOwner()->getLinkedSiteTree();
@@ -85,7 +85,7 @@ class SiteTreeLink extends SuperLinkTypeExtension
         $value = $siteTree->isCurrent();
     }
 
-    public function updateIsSection(bool $value): void
+    public function updateIsSection(bool &$value): void
     {
         if (!$this->isLinkTypeMatch()) return;
         $siteTree = $this->getOwner()->getLinkedSiteTree();
