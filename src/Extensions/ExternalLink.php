@@ -27,10 +27,6 @@ class ExternalLink extends SuperLinkTypeExtension
         'ExternalURL' => 'Varchar(2083)'
     ];
 
-    private static $field_labels = [
-        'ExternalURL' => 'URL'
-    ];
-
     public function updateDefaultTitle(?string &$title): void
     {
         if (!$this->isLinkTypeMatch()) return;
@@ -50,7 +46,7 @@ class ExternalLink extends SuperLinkTypeExtension
         if (!$this->isLinkTypeMatch($type)) return;
         $fields->push(ExternalURLField::create(
             $fieldPrefix . 'ExternalURL',
-            $this->getOwner()->fieldLabel('ExternalURL')
+            _t(__CLASS__ . '.ExternalURL', 'URL')
         ));
     }
 }

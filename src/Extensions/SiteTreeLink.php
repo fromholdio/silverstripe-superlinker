@@ -30,11 +30,6 @@ class SiteTreeLink extends SuperLinkTypeExtension
         'SiteTree' => SiteTree::class
     ];
 
-    private static $field_labels = [
-        'SiteTree' => 'Page on this website',
-        'SiteTreeAnchor' => 'Page anchor'
-    ];
-
     public function getLinkedSiteTree(): ?SiteTree
     {
         if (!$this->isLinkTypeMatch()) return null;
@@ -126,10 +121,10 @@ class SiteTreeLink extends SuperLinkTypeExtension
 
         $siteTreeField = TreeDropdownField::create(
             $fieldPrefix . 'SiteTreeID',
-            $this->getOwner()->fieldLabel('SiteTree'),
+            _t(__CLASS__ . '.PageOnThisWebsite', 'Page on this website'),
             SiteTree::class
         );
-        $siteTreeField->setEmptyString('-- Select a page --');
+        $siteTreeField->setEmptyString('-- ' . _t(__CLASS__ . '.SelectAPage', 'Select a page') . ' --');
         $siteTreeField->setHasEmptyDefault(true);
         $fields->push($siteTreeField);
 
@@ -149,12 +144,12 @@ class SiteTreeLink extends SuperLinkTypeExtension
 
         $anchorField = DependentGroupedDropdownField::create(
             $fieldPrefix . 'SiteTreeAnchor',
-            $this->getOwner()->fieldLabel('SiteTreeAnchor'),
+            _t(__CLASS__ . '.PageAnchorOptional', 'Page anchor (optional)'),
             $anchorSource
         );
         $anchorField
             ->setDepends($siteTreeField)
-            ->setEmptyString('Select an anchor (optional)');
+            ->setEmptyString('-- ' . _t(__CLASS__ . '.SelectAnAnchor', 'Select an anchor') . ' --');
         $fields->push($anchorField);
     }
 }

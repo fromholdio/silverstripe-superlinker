@@ -24,10 +24,6 @@ class PhoneLink extends SuperLinkTypeExtension
         'PhoneNumber' => 'Phone'
     ];
 
-    private static $field_labels = [
-        'PhoneNumber' => 'Phone number'
-    ];
-
     public function updateDefaultTitle(?string &$title): void
     {
         if (!$this->isLinkTypeMatch()) return;
@@ -50,7 +46,7 @@ class PhoneLink extends SuperLinkTypeExtension
         if (!$this->isLinkTypeMatch($type)) return;
         $fields->push(InternationalPhoneNumberField::create(
             $fieldPrefix . 'PhoneNumber',
-            $this->getOwner()->fieldLabel('PhoneNumber')
+            _t(__CLASS__ . '.PhoneNumber', 'Phone number')
         ));
     }
 }
