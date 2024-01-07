@@ -2,97 +2,76 @@
 
 namespace Fromholdio\SuperLinker\Extensions;
 
+use Fromholdio\GlobalAnchors\GlobalAnchors;
 use SilverStripe\CMS\Controllers\ContentController;
-use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Forms\DropdownField;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\ORM\DataExtension;
-use SilverStripe\ORM\ValidationResult;
 
-class GlobalAnchorLink extends DataExtension
+class GlobalAnchorLink extends SuperLinkTypeExtension
 {
-    private static $singular_name = 'Global Anchor Link';
-    private static $plural_name = 'Global Anchor Links';
+    private static $extension_link_type = 'globalanchor';
 
-    private static $multi_add_title = 'Global Anchor';
+    private static $types = [
+        'globalanchor' => [
+            'label' => 'Global anchor',
+            'settings' => [
+                'open_in_new' => false,
+                'no_follow' => false
+            ]
+        ]
+    ];
 
-    private static $allow_anchor = true;
+    private static $db = [
+        'GlobalAnchorKey' => 'Varchar(30)'
+    ];
 
-    private static $enable_url_field_validation = false;
-
-    public function updateLinkFields(FieldList &$fields)
+    public function getLinkedGlobalAnchor(): ?string
     {
-        $fields = FieldList::create(
+        if (!$this->isLinkTypeMatch()) return null;
+        $anchors = GlobalAnchors::get_anchors();
+        $key = $this->getOwner()->getField('GlobalAnchorKey');
+        return isset($anchors[$key]) ? $key : null;
+    }
+
+    public function updateDefaultTitle(?string &$title): void
+    {
+        if (!$this->isLinkTypeMatch()) return;
+        $anchor = $this->getOwner()->getLinkedGlobalAnchor();
+        $title = GlobalAnchors::get_anchor_title($anchor);
+    }
+
+    public function updateURL(?string &$url): void
+    {
+        if (!$this->isLinkTypeMatch()) return;
+        $anchor = $this->getOwner()->getLinkedGlobalAnchor();
+        $url = empty($anchor) ? null : '#' . $anchor;
+    }
+
+    public function updateAbsoluteURL(?string &$url): void
+    {
+        if (!$this->isLinkTypeMatch()) return;
+        $anchor = $this->getOwner()->getLinkedGlobalAnchor();
+        if (empty($anchor)) {
+            $url = null;
+            return;
+        }
+        $curr = Controller::curr();
+        $link = $curr instanceof ContentController
+            ? $curr->Link()
+            : Director::absoluteBaseURL();
+        $url = Controller::join_links($link, '#' . $anchor);
+    }
+
+    public function updateCMSLinkTypeFields($fields, $type, $fieldPrefix): void
+    {
+        if ($type !== 'globalanchor') return;
+        $fields->push(
             DropdownField::create(
-                'Anchor',
-                _t(__CLASS__.'.Anchor', 'Anchor'),
-                $this->owner->getGlobalAnchors()
+                $fieldPrefix . 'GlobalAnchorKey',
+                _t(__CLASS__ . '.GlobalAnchor', 'Global anchor'),
+                GlobalAnchors::get_anchors()
             )
         );
-    }
-
-    public function updateValidate(ValidationResult &$result)
-    {
-        if (!$this->owner->Anchor) {
-            $result->addFieldError('Anchor', _t(__CLASS__.'.AnchorRequired', 'You must select an anchor'));
-        }
-    }
-
-    public function updateGenerateLinkText(&$text)
-    {
-        $text = $this->owner->getGlobalAnchor($this->owner->Anchor);
-    }
-
-    public function updateHasTarget(&$hasTarget)
-    {
-        $anchor = $this->owner->getGlobalAnchor($this->owner->Anchor);
-        $hasTarget = $anchor && !empty($anchor);
-    }
-
-    public function updateIsSiteURL(bool &$isSiteURL)
-    {
-        $isSiteURL = true;
-    }
-
-    public function updateLink(&$link)
-    {
-        if (!$this->owner->Anchor || !$this->owner->isAnchorAllowed()) {
-            $link = null;
-            return;
-        }
-
-        $link = '#' . $this->owner->Anchor;
-    }
-
-    public function updateAbsoluteLink(&$link)
-    {
-        if (!$this->owner->Anchor || !$this->owner->isAnchorAllowed()) {
-            $link = null;
-            return;
-        }
-
-        $currentController = Controller::curr();
-        if (is_a($currentController, ContentController::class)) {
-            $currentPage = $currentController->data();
-            if ($currentPage && is_a($currentPage, SiteTree::class)) {
-                $link = Controller::join_links(
-                    $currentPage->AbsoluteLink(),
-                    '#' . $this->owner->Anchor
-                );
-                return;
-            }
-        }
-
-        $link = Controller::join_links(
-            Director::absoluteBaseURL(),
-            '#' . $this->owner->Anchor
-        );
-    }
-
-    public function updateLinkTarget(&$target)
-    {
-        $target = $this->owner->dbObject('Anchor');
     }
 }

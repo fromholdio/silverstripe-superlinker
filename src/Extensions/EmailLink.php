@@ -2,100 +2,74 @@
 
 namespace Fromholdio\SuperLinker\Extensions;
 
+use SilverStripe\Core\Convert;
 use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\DataExtension;
-use SilverStripe\ORM\ValidationResult;
 
-class EmailLink extends DataExtension
+class EmailLink extends SuperLinkTypeExtension
 {
-    private static $singular_name = 'Email Link';
-    private static $plural_name = 'Email Links';
+    private static $extension_link_type = 'email';
 
-    private static $multi_add_title = 'Email address';
-
-    private static $enable_url_field_validation = false;
-
-    private static $db = [
-        'Email'     =>  'Varchar(320)',
-        'EmailCC'   =>  'Varchar(320)',
-        'EmailBCC'  =>  'Varchar(320)',
-        'Subject'   =>  'Varchar(255)',
-        'Body'      =>  'Text'
+    private static $types = [
+        'email' => [
+            'label' => 'Email address',
+            'cc' => false,
+            'bcc' => false,
+            'subject' => true,
+            'body' => true,
+            'settings' => [
+                'open_in_new' => false,
+                'no_follow' => false
+            ]
+        ]
     ];
 
-    public function updateLinkFields(FieldList &$fields)
+    private static $db = [
+        'Email' => 'Varchar',
+        'EmailCC' => 'Varchar',
+        'EmailBCC' => 'Varchar',
+        'EmailSubject' => 'Varchar(255)',
+        'EmailBody' => 'Text'
+    ];
+
+    public function updateDefaultTitle(?string &$title): void
     {
-        $fields = FieldList::create(
-            EmailField::create('Email', _t(__CLASS__.'.Email', 'Email')),
-            EmailField::create('EmailCC', _t(__CLASS__.'.EmailCC', 'CC')),
-            EmailField::create('EmailBCC', _t(__CLASS__.'.EmailBCC', 'BCC')),
-            TextField::create('Subject', _t(__CLASS__.'.Subject', 'Subject')),
-            TextareaField::create('Body', _t(__CLASS__.'.Body', 'Body'))
-        );
+        if (!$this->isLinkTypeMatch()) return;
+        $title = $this->getOwner()->getField('Email');
     }
 
-    public function updateValidate(ValidationResult &$result)
+    public function updateURL(?string &$url): void
     {
-        if (!$this->owner->Email) {
-            $result->addFieldError('Email', _t(__CLASS__.'.MustProvideEmail', 'You must provide an Email Address'));
-        }
-    }
-
-    public function updateGenerateLinkText(&$text)
-    {
-        $text = $this->owner->Email;
-    }
-
-    public function updateHasTarget(&$hasTarget)
-    {
-        $email = $this->getOwner()->Email;
-        $hasTarget = $email && !empty($email);
-    }
-
-    public function updateIsSiteURL(bool &$isSiteURL)
-    {
-        $isSiteURL = true;
-    }
-
-    public function updateLink(&$link)
-    {
-        if (!$this->owner->Email) {
-            $link = null;
+        if (!$this->isLinkTypeMatch()) return;
+        $email = $this->getOwner()->getField('Email');
+        if (empty($email)) {
+            $url = null;
             return;
         }
-
-        $link = 'mailto:' . $this->owner->Email;
-
-        $parts = [];
-
-        if ($this->owner->EmailCC) {
-            $parts[] = 'cc=' . $this->owner->EmailCC;
-        }
-        if ($this->owner->EmailBCC) {
-            $parts[] = 'bcc=' . $this->owner->EmailBCC;
-        }
-        if ($this->owner->Subject) {
-            $parts[] = 'subject=' . urlencode($this->owner->Subject);
-        }
-        if ($this->owner->Body) {
-            $parts[] = 'body=' . urlencode($this->owner->Body);
-        }
-
-        if (count($parts) > 0) {
-            $link .= '&' . implode('&', $parts);
+        $url = 'mailto:' . $email;
+        $urlParts = [
+            'cc' => $this->getOwner()->getField('EmailCC'),
+            'bcc' => $this->getOwner()->getField('EmailBCC'),
+            'subject' => $this->getOwner()->getField('EmailSubject'),
+            'body' => $this->getOwner()->getField('EmailBody')
+        ];
+        $urlParts = array_filter($urlParts);
+        if (!empty($urlParts)) {
+            $prefix = '?';
+            foreach ($urlParts as $key => $value) {
+                $url .= $prefix . $key . '=' . Convert::raw2mailto($value);
+                $prefix = '&';
+            }
         }
     }
 
-    public function updateAbsoluteLink(&$link)
+    public function updateCMSLinkTypeFields(FieldList $fields, string $type, string $fieldPrefix): void
     {
-        $link = $this->owner->Link();
-    }
-
-    public function updateLinkTarget(&$target)
-    {
-        $target = $this->owner->dbObject('Email');
+        if (!$this->isLinkTypeMatch($type)) return;
+        $fields->push(EmailField::create($fieldPrefix . 'Email', _t(__CLASS__ . '.Email', 'Email')));
+        $fields->push(TextField::create($fieldPrefix . 'EmailSubject', _t(__CLASS__ . '.Subject', 'Subject')));
+        $fields->push(TextareaField::create($fieldPrefix . 'EmailBody', _t(__CLASS__ . '.Body', 'Body')));
     }
 }
