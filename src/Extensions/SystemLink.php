@@ -24,10 +24,6 @@ class SystemLink extends SuperLinkTypeExtension
         'SystemLinkKey' => 'Varchar(30)'
     ];
 
-    private static $field_labels = [
-        'SystemLinkKey' => 'System link'
-    ];
-
     public function getLinkedSystemLink(): ?ArrayData
     {
         if (!$this->isLinkTypeMatch()) return null;
@@ -52,7 +48,7 @@ class SystemLink extends SuperLinkTypeExtension
         $fields->push(
             DropdownField::create(
                 $fieldPrefix . 'SystemLinkKey',
-                $this->getOwner()->fieldLabel('SystemLinkKey'),
+                _t(__CLASS__ . '.SystemLink', 'System Link'),
                 SystemLinks::get_map()
             )
         );

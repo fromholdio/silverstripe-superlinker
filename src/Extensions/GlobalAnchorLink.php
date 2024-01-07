@@ -26,10 +26,6 @@ class GlobalAnchorLink extends SuperLinkTypeExtension
         'GlobalAnchorKey' => 'Varchar(30)'
     ];
 
-    private static $field_labels = [
-        'GlobalAnchorKey' => 'Global anchor'
-    ];
-
     public function getLinkedGlobalAnchor(): ?string
     {
         if (!$this->isLinkTypeMatch()) return null;
@@ -73,7 +69,7 @@ class GlobalAnchorLink extends SuperLinkTypeExtension
         $fields->push(
             DropdownField::create(
                 $fieldPrefix . 'GlobalAnchorKey',
-                $this->getOwner()->fieldLabel('GlobalAnchorKey'),
+                _t(__CLASS__ . '.GlobalAnchor', 'Global anchor'),
                 GlobalAnchors::get_anchors()
             )
         );
