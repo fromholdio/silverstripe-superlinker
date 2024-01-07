@@ -1,0 +1,43 @@
+en:
+  Fromholdio\SuperLinker\Extensions\EmailLink:
+    Body: Body
+    Email: Email
+    EmailBCC: BCC
+    EmailCC: CC
+    MustProvideEmail: 'You must provide an Email Address'
+    Subject: Subject
+  Fromholdio\SuperLinker\Extensions\ExternalURLLink:
+    ExternalURLMustBeComplete: 'External URLs must be complete including http:// or https://'
+    URL: URL
+  Fromholdio\SuperLinker\Extensions\FileLink:
+    File: File
+    FileRequired: 'You must upload or select a file to link to'
+  Fromholdio\SuperLinker\Extensions\GlobalAnchorLink:
+    Anchor: Anchor
+    AnchorRequired: 'You must select an anchor'
+  Fromholdio\SuperLinker\Extensions\NoLink:
+    NoLink: '- No Link -'
+    TitleRequired: 'You must provide a Title'
+  Fromholdio\SuperLinker\Extensions\PhoneLink:
+    Phone: Phone
+    PhoneRequired: 'You must provide a phone number'
+  Fromholdio\SuperLinker\Extensions\SiteTreeLink:
+    Anchor: Anchor
+    Page: Page
+    PageRequired: 'You must select a page to link to'
+    SelectAPage: 'Select a page'
+    SelectAnchor: 'Select an anchor (optional)'
+  Fromholdio\SuperLinker\Extensions\SystemLink:
+    SystemLink: 'System Link'
+    SystemLinkRequired: 'You must select a system link'
+  Fromholdio\SuperLinker\Model\SuperLink:
+    CustomLinkText: 'Link Text'
+    DoNoFollow: 'Instruct search engines not to follow this link'
+    DoOpenNewWindow: 'Open link in a new window'
+    NewWindow: 'New Window'
+    OptionalWillBeGenerated: 'Optional. Will be auto-generated if left blank.'
+    TabBehaviour: Behaviour
+    TabTarget: Target
+    URL: URL
+    URLInvalid: 'You must provide a valid URL'
+    URLRequired: 'You must provide a URL'

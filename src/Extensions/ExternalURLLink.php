@@ -26,7 +26,7 @@ class ExternalURLLink extends DataExtension
 
         $fields->replaceField(
             'URL',
-            $urlField = ExternalURLField::create('URL', $this->owner->fieldLabel('URL'))
+            $urlField = ExternalURLField::create('URL', _t(__CLASS__.'.URL', 'URL'))
         );
 
         $urlField->setConfig('removeparts', [
@@ -38,7 +38,7 @@ class ExternalURLLink extends DataExtension
     public function updateValidate(ValidationResult &$result)
     {
         if (!Director::is_absolute_url($this->owner->URL)) {
-            $result->addFieldError('URL', 'External URLs must be complete including http:// or https://');
+            $result->addFieldError('URL', _t(__CLASS__.'.ExternalURLMustBeComplete', 'External URLs must be complete including http:// or https://'));
         }
     }
 

@@ -27,14 +27,14 @@ class PhoneLink extends DataExtension
     public function updateLinkFields(FieldList &$fields)
     {
         $fields = FieldList::create(
-            TextField::create('Phone', $this->owner->fieldLabel('Phone'))
+            TextField::create('Phone', _t(__CLASS__.'.Phone', 'Phone'))
         );
     }
 
     public function updateValidate(ValidationResult &$result)
     {
         if (!$this->owner->Phone) {
-            $result->addFieldError('Phone', 'You must provide a phone number');
+            $result->addFieldError('Phone', _t(__CLASS__.'.PhoneRequired', 'You must provide a phone number'));
         }
     }
 

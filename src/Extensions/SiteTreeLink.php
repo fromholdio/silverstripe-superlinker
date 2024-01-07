@@ -51,26 +51,26 @@ class SiteTreeLink extends DataExtension
         $fields = FieldList::create(
             $siteTreeField = TreeDropdownField::create(
                 'SiteTreeID',
-                $this->owner->fieldLabel('SiteTree'),
+                _t(__CLASS__.'.Page', 'Page'),
                 SiteTree::class
             )
-                ->setEmptyString('Select a page')
+                ->setEmptyString(_t(__CLASS__.'.SelectAPage', 'Select a page'))
                 ->setHasEmptyDefault(true)
             ,
             DependentGroupedDropdownField::create(
                 'Anchor',
-                $this->owner->fieldLabel('Anchor'),
+                _t(__CLASS__.'.Anchor', 'Anchor'),
                 $anchorSource
             )
                 ->setDepends($siteTreeField)
-                ->setEmptyString('Select an anchor (optional)')
+                ->setEmptyString(_t(__CLASS__.'.SelectAnchor', 'Select an anchor (optional)'))
         );
     }
 
     public function updateValidate(ValidationResult &$result)
     {
         if (!$this->owner->SiteTreeID) {
-            $result->addFieldError('SiteTreeID', 'You must select a page to link to');
+            $result->addFieldError('SiteTreeID', _t(__CLASS__.'.PageRequired', 'You must select a page to link to'));
         }
     }
 

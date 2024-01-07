@@ -24,7 +24,7 @@ class FileLink extends DataExtension
     public function updateLinkFields(FieldList &$fields)
     {
         $fields = FieldList::create(
-            $uploadField = UploadField::create('File', $this->owner->fieldLabel('File'))
+            $uploadField = UploadField::create('File', _t(__CLASS__.'.File', 'File'))
         );
 
         $uploadField->setAllowedMaxFileNumber(1);
@@ -33,7 +33,7 @@ class FileLink extends DataExtension
     public function updateValidate(ValidationResult &$result)
     {
         if (!$this->owner->FileID) {
-            $result->addFieldError('File', 'You must upload or select a file to link to');
+            $result->addFieldError('File', _t(__CLASS__.'.FileRequired', 'You must upload or select a file to link to'));
         }
     }
 

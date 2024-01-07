@@ -43,7 +43,7 @@ class SystemLink extends DataExtension
         $fields = FieldList::create(
             DropdownField::create(
                 'Key',
-                'System Links',
+                _t(__CLASS__.'.SystemLink', 'System Link'),
                 $keySource
             )
                 ->setHasEmptyDefault(false)
@@ -53,7 +53,7 @@ class SystemLink extends DataExtension
     public function updateValidate(ValidationResult &$result)
     {
         if (!$this->owner->Key) {
-            $result->addFieldError('Key', 'You must select a system link');
+            $result->addFieldError('Key', _t(__CLASS__.'.SystemLinkRequired', 'You must select a system link'));
         }
     }
 

@@ -51,12 +51,6 @@ class SuperLink extends DataObject
         'DoNoFollow'        =>  false
     ];
 
-    private static $field_labels = [
-        'CustomLinkText'    =>  'Link text',
-        'DoOpenNewWindow'   =>  'Open link in a new window',
-        'DoNoFollow'        =>  'Instruct search engines not to follow this link'
-    ];
-
     private static $casting = [
         'Title'             =>  'Varchar',
         'Href'              =>  'HTMLFragment',
@@ -310,10 +304,10 @@ class SuperLink extends DataObject
         if ($isCustomLinkTextEnabled) {
             $customLinkTextField = TextField::create(
                 'CustomLinkText',
-                $this->fieldLabel('CustomLinkText')
+                _t(__CLASS__.'.CustomLinkText', 'Link Text')
             );
             if (!$this->isInDB()) {
-                $customLinkTextField->setDescription('Optional. Will be auto-generated if left blank.');
+                $customLinkTextField->setDescription(_t(__CLASS__.'.OptionalWillBeGenerated', 'Optional. Will be auto-generated if left blank.'));
             }
             if ($this->generateLinkText()) {
                 $customLinkTextField->setAttribute('placeholder', $this->generateLinkText());
@@ -327,7 +321,7 @@ class SuperLink extends DataObject
             $linkFields = $this->getLinkFields()->toArray();
             $hasLinkFields = ($linkFields && count($linkFields) > 0);
             if ($hasLinkFields) {
-                $targetTab = Tab::create('SuperLinkTargetTab', 'Target');
+                $targetTab = Tab::create('SuperLinkTargetTab', _t(__CLASS__.'.TabTarget', 'Target'));
                 if ($isCustomLinkTextEnabled) {
                     $targetTab->push($customLinkTextField);
                 }
@@ -340,7 +334,7 @@ class SuperLink extends DataObject
             $behaviourFields = $this->getBehaviourFields()->toArray();
             $hasBehaviourFields = ($behaviourFields && count($behaviourFields) > 0);
             if ($hasBehaviourFields) {
-                $behaviourTab = Tab::create('SuperLinkBehaviourTab', 'Behaviour');
+                $behaviourTab = Tab::create('SuperLinkBehaviourTab', _t(__CLASS__.'.TabBehaviour', 'Behaviour'));
                 if (!$hasBehaviourFields && $isCustomLinkTextEnabled) {
                     $behaviourTab->push($customLinkTextField);
                 }
@@ -380,7 +374,7 @@ class SuperLink extends DataObject
     public function getLinkFields()
     {
         $fields = FieldList::create(
-            TextField::create('URL', $this->fieldLabel('URL'))
+            TextField::create('URL', _t(__CLASS__.'.URL', 'URL'))
         );
 
         $this->extend('updateLinkFields', $fields);
@@ -391,17 +385,17 @@ class SuperLink extends DataObject
     {
         $fields = FieldList::create(
             FieldGroup::create(
-                'New Window',
+                _t(__CLASS__.'.NewWindow', 'New Window'),
                 CheckboxField::create(
                     'DoOpenNewWindow',
-                    $this->fieldLabel('DoOpenNewWindow')
+                    _t(__CLASS__.'.DoOpenNewWindow', 'Open link in a new window')
                 )
             ),
             FieldGroup::create(
                 'SEO',
                 CheckboxField::create(
                     'DoNoFollow',
-                    $this->fieldLabel('DoNoFollow')
+                    _t(__CLASS__.'.DoNoFollow', 'Instruct search engines not to follow this link')
                 )
             )
         );
@@ -415,9 +409,9 @@ class SuperLink extends DataObject
 
         if ($this->isURLFieldValidationEnabled()) {
             if (!$this->URL) {
-                $result->addFieldError('URL', 'You must provide a URL');
+                $result->addFieldError('URL', _t(__CLASS__.'.URLRequired', 'You must provide a URL'));
             } else if (!filter_var($this->URL, FILTER_VALIDATE_URL)) {
-                $result->addFieldError('URL', 'You must provide a valid URL');
+                $result->addFieldError('URL', _t(__CLASS__.'.URLInvalid', 'You must provide a valid URL'));
             }
         }
 
