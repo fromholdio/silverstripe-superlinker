@@ -453,7 +453,11 @@ trait SuperLinkTrait
             ? $this->renderWith($this->getRenderTemplates())
             : '';
         $this->extend('updateForTemplate', $html);
-        return $html;
+        if (is_a($html, DBHTMLText::class)) {
+            return $html;
+        } else {
+            return DBHTMLText::create()->setValue($html);
+        }
     }
 
     protected function getRenderTemplates(?string $suffix = null): array
