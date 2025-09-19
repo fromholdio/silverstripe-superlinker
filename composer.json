@@ -27,5 +27,10 @@
         "psr-4": {
             "Fromholdio\\SuperLinker\\": "src/"
         }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-4.x": "4.0.x-dev"
+        }
     }
 }
