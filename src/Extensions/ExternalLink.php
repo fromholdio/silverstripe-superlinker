@@ -2,7 +2,7 @@
 
 namespace Fromholdio\SuperLinker\Extensions;
 
-use BurnBright\ExternalURLField\ExternalURLField;
+use Fromholdio\ExternalURLField\ExternalURLField;
 use SilverStripe\Forms\FieldList;
 
 class ExternalLink extends SuperLinkTypeExtension

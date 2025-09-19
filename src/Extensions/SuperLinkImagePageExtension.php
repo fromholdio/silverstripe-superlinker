@@ -3,9 +3,9 @@
 namespace Fromholdio\SuperLinker\Extensions;
 
 use SilverStripe\Assets\Image;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 
-class SuperLinkImagePageExtension extends DataExtension
+class SuperLinkImagePageExtension extends Extension
 {
     private static $superlink_default_image_source_method = 'getFeatureImage';
 

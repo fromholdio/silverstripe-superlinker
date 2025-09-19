@@ -6,10 +6,10 @@ use Fromholdio\SuperLinker\Model\SuperLink;
 use Fromholdio\SuperLinker\Model\VersionedSuperLink;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Assets\Image;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\ORM\DataExtension;
 
-class SuperLinkIconExtension extends DataExtension
+class SuperLinkIconExtension extends Extension
 {
     private static $settings = [
         'icon' => true

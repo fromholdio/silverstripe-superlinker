@@ -5,7 +5,7 @@ namespace Fromholdio\SuperLinker\Extensions;
 use Fromholdio\SystemLinks\SystemLinks;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\View\ArrayData;
+use SilverStripe\Model\ArrayData;
 
 class SystemLink extends SuperLinkTypeExtension
 {

@@ -4,10 +4,10 @@ namespace Fromholdio\SuperLinker\Extensions;
 
 use Fromholdio\SuperLinker\Model\SuperLink;
 use Fromholdio\SuperLinker\Model\VersionedSuperLink;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\DataExtension;
 
 /**
  * Apply to your SuperLink classes to enable a text description in addition to
@@ -17,7 +17,7 @@ use SilverStripe\ORM\DataExtension;
  *
  * Just apply this extension to your SuperLink class/subclass.
  */
-class SuperLinkDescriptionExtension extends DataExtension
+class SuperLinkDescriptionExtension extends Extension
 {
     private static $link_description_rows = 1;
 

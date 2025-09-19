@@ -1,6 +1,6 @@
 # silverstripe-superlinker
 
-Requires Silverstripe 5+
+Requires Silverstripe 6.x
 
 ## CMS fields testing snippets
 
