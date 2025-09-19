@@ -447,7 +447,7 @@ trait SuperLinkTrait
      * ----------------------------------------------------
      */
 
-    public function forTemplate(): DBHTMLText
+    public function forTemplate(): string
     {
         $html = $this->isLinkValid()
             ? $this->renderWith($this->getRenderTemplates())
@@ -455,9 +455,8 @@ trait SuperLinkTrait
         $this->extend('updateForTemplate', $html);
         if (is_a($html, DBHTMLText::class)) {
             return $html;
-        } else {
-            return DBHTMLText::create()->setValue($html);
         }
+        return DBHTMLText::create()->setValue($html);
     }
 
     protected function getRenderTemplates(?string $suffix = null): array
