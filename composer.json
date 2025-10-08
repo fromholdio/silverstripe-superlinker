@@ -15,12 +15,12 @@
     "require": {
         "silverstripe/cms": "^6.0",
         "fromholdio/silverstripe-dbhtmlanchors":  "^2.1.0",
-        "fromholdio/silverstripe-dependentgroupeddropdownfield": "^4.0.0",
+        "fromholdio/silverstripe-dependentgroupeddropdownfield": "^4.0.1",
         "fromholdio/silverstripe-externalurlfield": "^2.0.0",
         "fromholdio/silverstripe-globalanchors": "^2.1.0",
         "fromholdio/silverstripe-minigridfield": "^2.0.0",
         "fromholdio/silverstripe-systemlinks": "^2.0.0",
-        "innoweb/silverstripe-international-phone-number-field": "^6.0.0",
+        "innoweb/silverstripe-international-phone-number-field": "^6.0.2",
         "unclecheese/display-logic": "^4.0.0"
     },
     "autoload": {
