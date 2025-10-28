@@ -126,6 +126,7 @@ class SiteTreeLink extends SuperLinkTypeExtension
         );
         $siteTreeField->setEmptyString('-- ' . _t(__CLASS__ . '.SelectAPage', 'Select a page') . ' --');
         $siteTreeField->setHasEmptyDefault(true);
+        $this->owner->invokeWithExtensions('updateSiteTreeField', $siteTreeField);
         $fields->push($siteTreeField);
 
         $siteTreeRoot = $this->getOwner()->getAllowedLinkedSiteTreeRoot();
