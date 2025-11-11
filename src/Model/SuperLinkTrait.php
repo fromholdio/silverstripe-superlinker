@@ -247,12 +247,26 @@ trait SuperLinkTrait
 
     public function getDefaultAttributes(): array
     {
-        $attrs = [
-            'href' => $this->getHrefValue(),
-            'target' => $this->getTargetValue(),
-            'rel' => $this->getRelValue(),
-            'class' => $this->getClassValue()
-        ];
+        $tag = $this->getTag();
+        if ($tag === 'a')
+        {
+            $attrs = [
+                'href' => $this->getHrefValue(),
+                'target' => $this->getTargetValue(),
+                'rel' => $this->getRelValue(),
+            ];
+        }
+        else {
+            $attrs = [
+                'data-superlinker-href' => $this->getHrefValue(),
+                'data-superlinker-target' => $this->getTargetValue(),
+                'data-superlinker-rel' => $this->getRelValue(),
+            ];
+        }
+        if ($tag === 'button') {
+            $attrs['type'] = 'button';
+        }
+        $attrs['class'] = $this->getClassValue();
         $type = $this->getType();
         $typeAttrName = static::config()->get('link_type_attr_name');
         if (!empty($typeAttrName)) {
@@ -260,6 +274,13 @@ trait SuperLinkTrait
         }
         $this->extend('updateDefaultAttributes', $attrs);
         return array_filter($attrs);
+    }
+
+    public function getTag(): string
+    {
+        $tag = 'a';
+        $this->extend('updateTag', $tag);
+        return $tag;
     }
 
 

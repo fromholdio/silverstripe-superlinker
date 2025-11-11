@@ -32,6 +32,8 @@ class SuperLinkTypeExtension extends Extension
 
     public function updateDefaultAttributes(array &$attrs): void {}
 
+    public function updateTag(string &$tag): void {}
+
     public function updateHrefValue(?string &$value): void {}
 
     public function updateURL(?string &$url): void {}
