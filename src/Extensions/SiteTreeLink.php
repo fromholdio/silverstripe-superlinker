@@ -102,12 +102,6 @@ class SiteTreeLink extends SuperLinkTypeExtension
         if (!empty($anchor)) $url .= '#' . $anchor;
     }
 
-    public function updateAbsoluteURL(?string &$url): void
-    {
-        if (!$this->isLinkTypeMatch()) return;
-        $url = $this->getOwner()->getLinkedSiteTree()?->AbsoluteLink();
-    }
-
     public function getAllowedLinkedSiteTreeRoot(): ?SiteTree
     {
         $siteTree = null;
