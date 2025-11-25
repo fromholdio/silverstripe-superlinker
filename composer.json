@@ -16,7 +16,8 @@
         "silverstripe/cms": "~5.0",
         "fromholdio/silverstripe-dependentgroupeddropdownfield": "^3.0.0",
         "fromholdio/silverstripe-externalurlfield": "^1.1.0",
-        "innoweb/silverstripe-international-phone-number-field": "^5.0.0"
+        "innoweb/silverstripe-international-phone-number-field": "^5.0.0",
+        "unclecheese/display-logic": "^3.0.0"
     },
     "suggest": {
         "fromholdio/silverstripe-dbhtmlanchors":  "",
