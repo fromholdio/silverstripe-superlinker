@@ -60,12 +60,6 @@ class FileLink extends SuperLinkTypeExtension
         $url = $this->getOwner()->getLinkedFile()?->Link();
     }
 
-    public function updateAbsoluteURL(?string &$url): void
-    {
-        if (!$this->isLinkTypeMatch()) return;
-        $url = $this->getOwner()->getLinkedFile()?->AbsoluteLink();
-    }
-
     public function isDownloadForced(): bool
     {
         if (!$this->isLinkTypeMatch()) return false;
