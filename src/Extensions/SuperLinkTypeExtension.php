@@ -5,13 +5,12 @@ namespace Fromholdio\SuperLinker\Extensions;
 use Fromholdio\SuperLinker\Model\SuperLink;
 use Fromholdio\SuperLinker\Model\VersionedSuperLink;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\FormField;
 use SilverStripe\Forms\SingleSelectField;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 
-class SuperLinkTypeExtension extends DataExtension
+class SuperLinkTypeExtension extends Extension
 {
     private static $extension_link_type = '';
 
@@ -32,6 +31,8 @@ class SuperLinkTypeExtension extends DataExtension
     public function updateDisallowedTypes(array &$types): void {}
 
     public function updateDefaultAttributes(array &$attrs): void {}
+
+    public function updateTag(string &$tag): void {}
 
     public function updateHrefValue(?string &$value): void {}
 

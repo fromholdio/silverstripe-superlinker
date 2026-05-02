@@ -13,18 +13,15 @@
         "homepage": "https://fromhold.io"
     }],
     "require": {
-        "silverstripe/cms": "~5.0",
-        "fromholdio/silverstripe-dependentgroupeddropdownfield": "^3.0.0",
-        "fromholdio/silverstripe-externalurlfield": "^1.1.0",
-        "innoweb/silverstripe-international-phone-number-field": "^5.0.0",
-        "unclecheese/display-logic": "^3.0.0"
-    },
-    "suggest": {
-        "fromholdio/silverstripe-dbhtmlanchors":  "",
-        "fromholdio/silverstripe-globalanchors": "",
-        "fromholdio/silverstripe-minigridfield": "",
-        "fromholdio/silverstripe-systemlinks": ""
-
+        "silverstripe/cms": "^6.0",
+        "fromholdio/silverstripe-dbhtmlanchors":  "^2.1.0",
+        "fromholdio/silverstripe-dependentgroupeddropdownfield": "^4.1.0",
+        "fromholdio/silverstripe-externalurlfield": "^2.0.0",
+        "fromholdio/silverstripe-globalanchors": "^2.1.0",
+        "fromholdio/silverstripe-minigridfield": "^2.0.0",
+        "fromholdio/silverstripe-systemlinks": "^2.0.0",
+        "innoweb/silverstripe-international-phone-number-field": "^6.0.2",
+        "unclecheese/display-logic": "^4.0.0"
     },
     "autoload": {
         "psr-4": {

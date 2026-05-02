@@ -6,7 +6,7 @@ use Fromholdio\DependentGroupedDropdownField\Forms\DependentGroupedDropdownField
 use Fromholdio\GlobalAnchors\GlobalAnchors;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TreeDropdownField;
+use SilverStripe\Forms\SearchableDropdownField;
 
 class SiteTreeLink extends SuperLinkTypeExtension
 {
@@ -113,19 +113,20 @@ class SiteTreeLink extends SuperLinkTypeExtension
     {
         if (!$this->isLinkTypeMatch($type)) return;
 
-        $siteTreeField = TreeDropdownField::create(
+        $siteTreeField = SearchableDropdownField::create(
             $fieldPrefix . 'SiteTreeID',
             _t(__CLASS__ . '.PageOnThisWebsite', 'Page on this website'),
-            SiteTree::class
+            SiteTree::get()
         );
         $siteTreeField->setEmptyString('-- ' . _t(__CLASS__ . '.SelectAPage', 'Select a page') . ' --');
         $siteTreeField->setHasEmptyDefault(true);
+        $this->owner->invokeWithExtensions('updateSiteTreeField', $siteTreeField);
         $fields->push($siteTreeField);
 
-        $siteTreeRoot = $this->getOwner()->getAllowedLinkedSiteTreeRoot();
-        if (!is_null($siteTreeRoot)) {
-            $siteTreeField->setTreeBaseID($siteTreeRoot->getField('ID'));
-        }
+//        $siteTreeRoot = $this->getOwner()->getAllowedLinkedSiteTreeRoot();
+//        if (!is_null($siteTreeRoot)) {
+//            $siteTreeField->setTreeBaseID($siteTreeRoot->getField('ID'));
+//        }
 
         if (!$this->getOwner()->getTypeConfigValue('allow_anchor', $type)) {
             return;

@@ -14,10 +14,10 @@ use SilverStripe\Forms\SingleSelectField;
 use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TabSet;
 use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBHTMLText;
-use SilverStripe\ORM\SS_List;
+use SilverStripe\Model\List\SS_List;
 use SilverStripe\View\AttributesHTML;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
 
@@ -247,12 +247,26 @@ trait SuperLinkTrait
 
     public function getDefaultAttributes(): array
     {
-        $attrs = [
-            'href' => $this->getHrefValue(),
-            'target' => $this->getTargetValue(),
-            'rel' => $this->getRelValue(),
-            'class' => $this->getClassValue()
-        ];
+        $tag = $this->getTag();
+        if ($tag === 'a')
+        {
+            $attrs = [
+                'href' => $this->getHrefValue(),
+                'target' => $this->getTargetValue(),
+                'rel' => $this->getRelValue(),
+            ];
+        }
+        else {
+            $attrs = [
+                'data-superlinker-href' => $this->getHrefValue(),
+                'data-superlinker-target' => $this->getTargetValue(),
+                'data-superlinker-rel' => $this->getRelValue(),
+            ];
+        }
+        if ($tag === 'button') {
+            $attrs['type'] = 'button';
+        }
+        $attrs['class'] = $this->getClassValue();
         $type = $this->getType();
         $typeAttrName = static::config()->get('link_type_attr_name');
         if (!empty($typeAttrName)) {
@@ -260,6 +274,13 @@ trait SuperLinkTrait
         }
         $this->extend('updateDefaultAttributes', $attrs);
         return array_filter($attrs);
+    }
+
+    public function getTag(): string
+    {
+        $tag = 'a';
+        $this->extend('updateTag', $tag);
+        return $tag;
     }
 
 
@@ -447,7 +468,7 @@ trait SuperLinkTrait
      * ----------------------------------------------------
      */
 
-    public function forTemplate(): DBHTMLText
+    public function forTemplate(): string
     {
         $html = $this->isLinkValid()
             ? $this->renderWith($this->getRenderTemplates())
@@ -455,9 +476,8 @@ trait SuperLinkTrait
         $this->extend('updateForTemplate', $html);
         if (is_a($html, DBHTMLText::class)) {
             return $html;
-        } else {
-            return DBHTMLText::create()->setValue($html);
         }
+        return DBHTMLText::create()->setValue($html);
     }
 
     protected function getRenderTemplates(?string $suffix = null): array
