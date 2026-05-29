@@ -6,7 +6,7 @@ use Fromholdio\DependentGroupedDropdownField\Forms\DependentGroupedDropdownField
 use Fromholdio\GlobalAnchors\GlobalAnchors;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\SearchableDropdownField;
+use SilverStripe\Forms\TreeDropdownField;
 
 class SiteTreeLink extends SuperLinkTypeExtension
 {
@@ -113,20 +113,21 @@ class SiteTreeLink extends SuperLinkTypeExtension
     {
         if (!$this->isLinkTypeMatch($type)) return;
 
-        $siteTreeField = SearchableDropdownField::create(
+        $siteTreeField = TreeDropdownField::create(
             $fieldPrefix . 'SiteTreeID',
             _t(__CLASS__ . '.PageOnThisWebsite', 'Page on this website'),
-            SiteTree::get()
+            SiteTree::class
         );
         $siteTreeField->setEmptyString('-- ' . _t(__CLASS__ . '.SelectAPage', 'Select a page') . ' --');
         $siteTreeField->setHasEmptyDefault(true);
-        $this->owner->invokeWithExtensions('updateSiteTreeField', $siteTreeField);
-        $fields->push($siteTreeField);
 
-//        $siteTreeRoot = $this->getOwner()->getAllowedLinkedSiteTreeRoot();
-//        if (!is_null($siteTreeRoot)) {
-//            $siteTreeField->setTreeBaseID($siteTreeRoot->getField('ID'));
-//        }
+        $siteTreeRoot = $this->getOwner()->getAllowedLinkedSiteTreeRoot();
+        if (!is_null($siteTreeRoot)) {
+            $siteTreeField->setTreeBaseID($siteTreeRoot->getField('ID'));
+        }
+
+        $fields->push($siteTreeField);
+        $this->getOwner()->invokeWithExtensions('updateSiteTreeField', $siteTreeField);
 
         if (!$this->getOwner()->getTypeConfigValue('allow_anchor', $type)) {
             return;
@@ -145,6 +146,8 @@ class SiteTreeLink extends SuperLinkTypeExtension
         $anchorField
             ->setDepends($siteTreeField)
             ->setEmptyString('-- ' . _t(__CLASS__ . '.SelectAnAnchor', 'Select an anchor') . ' --');
+
         $fields->push($anchorField);
+        $this->getOwner()->invokeWithExtensions('updateAnchorField', $anchorField);
     }
 }
