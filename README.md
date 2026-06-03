@@ -210,11 +210,24 @@ Links to pages within your SilverStripe site.
 - Configurable tree root
 
 **Configuration**:
+
+Disable anchor fields:
+
 ```yaml
 Fromholdio\SuperLinker\Model\SuperLink:
   types:
     sitetree:
-      allow_anchor: true
+      allow_anchor: false
+```
+
+By default, the field uses as `TreeDropdownField` to select a page. 
+You can switch this to a flat-structure `SearchableDropdownField`:
+
+```yaml
+Fromholdio\SuperLinker\Model\SuperLink:
+  types:
+    sitetree:
+      use_searchable_dropdown_field: true
 ```
 
 **Usage**:
