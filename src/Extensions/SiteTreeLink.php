@@ -6,6 +6,7 @@ use Fromholdio\DependentGroupedDropdownField\Forms\DependentGroupedDropdownField
 use Fromholdio\GlobalAnchors\GlobalAnchors;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\SearchableDropdownField;
 use SilverStripe\Forms\TreeDropdownField;
 
 class SiteTreeLink extends SuperLinkTypeExtension
@@ -18,7 +19,8 @@ class SiteTreeLink extends SuperLinkTypeExtension
             'allow_anchor' => true,
             'settings' => [
                 'no_follow' => false
-            ]
+            ],
+            'use_searchable_dropdown_field' => false,
         ]
     ];
 
@@ -113,18 +115,26 @@ class SiteTreeLink extends SuperLinkTypeExtension
     {
         if (!$this->isLinkTypeMatch($type)) return;
 
-        $siteTreeField = TreeDropdownField::create(
-            $fieldPrefix . 'SiteTreeID',
-            _t(__CLASS__ . '.PageOnThisWebsite', 'Page on this website'),
-            SiteTree::class
-        );
+        if ($this->getOwner()->getTypeConfigValue('use_searchable_dropdown_field', $type)) {
+            $siteTreeField = SearchableDropdownField::create(
+                $fieldPrefix . 'SiteTreeID',
+                _t(__CLASS__ . '.PageOnThisWebsite', 'Page on this website'),
+                SiteTree::get()
+            );
+        } else {
+            $siteTreeField = TreeDropdownField::create(
+                $fieldPrefix . 'SiteTreeID',
+                _t(__CLASS__ . '.PageOnThisWebsite', 'Page on this website'),
+                SiteTree::class
+            );
+            $siteTreeRoot = $this->getOwner()->getAllowedLinkedSiteTreeRoot();
+            if (!is_null($siteTreeRoot)) {
+                $siteTreeField->setTreeBaseID($siteTreeRoot->getField('ID'));
+            }
+        }
+
         $siteTreeField->setEmptyString('-- ' . _t(__CLASS__ . '.SelectAPage', 'Select a page') . ' --');
         $siteTreeField->setHasEmptyDefault(true);
-
-        $siteTreeRoot = $this->getOwner()->getAllowedLinkedSiteTreeRoot();
-        if (!is_null($siteTreeRoot)) {
-            $siteTreeField->setTreeBaseID($siteTreeRoot->getField('ID'));
-        }
 
         $fields->push($siteTreeField);
         $this->getOwner()->invokeWithExtensions('updateSiteTreeField', $siteTreeField);
