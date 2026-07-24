@@ -60,9 +60,11 @@ class SiteTreeLink extends SuperLinkTypeExtension
             $anchors['Page content'] = array_combine($contentAnchors, $contentAnchors);
         }
 
-        $globalAnchors = GlobalAnchors::get_anchors();
-        if (!empty($globalAnchors)) {
-            $anchors['Global anchors'] = $globalAnchors;
+        if (class_exists(GlobalAnchors::class)) {
+            $globalAnchors = GlobalAnchors::get_anchors();
+            if (!empty($globalAnchors)) {
+                $anchors['Global anchors'] = $globalAnchors;
+            }
         }
 
         $this->getOwner()->invokeWithExtensions(
