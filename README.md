@@ -204,18 +204,32 @@ $fields->addFieldToTab('Root.Main',
 Links to pages within your SilverStripe site.
 
 **Features**:
-- TreeDropdownField for page selection
+- SearchableDropdownField for page selection by default, or TreeDropdownField
 - Optional anchor selection (page content + global anchors)
 - isCurrent() and isSection() support
-- Configurable tree root
+- Configurable tree root (TreeDropdownField only)
 
 **Configuration**:
+
+Disable anchor fields:
+
 ```yaml
 Fromholdio\SuperLinker\Model\SuperLink:
   types:
     sitetree:
-      allow_anchor: true
+      allow_anchor: false
 ```
+
+By default, pages are selected with a flat `SearchableDropdownField`. To use a hierarchical `TreeDropdownField` instead, which also applies the configurable tree root, set `use_searchable_dropdown_field` to `false`:
+
+```yaml
+Fromholdio\SuperLinker\Model\SuperLink:
+  types:
+    sitetree:
+      use_searchable_dropdown_field: false
+```
+
+These settings apply per class. `SuperLink` and `VersionedSuperLink` are separate classes that share `SuperLinkTrait`, so configuring one does not change the other. Repeat these settings under `Fromholdio\SuperLinker\Model\VersionedSuperLink` if you use both.
 
 **Usage**:
 ```php
