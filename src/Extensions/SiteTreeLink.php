@@ -20,7 +20,7 @@ class SiteTreeLink extends SuperLinkTypeExtension
             'settings' => [
                 'no_follow' => false
             ],
-            'use_searchable_dropdown_field' => false,
+            'use_searchable_dropdown_field' => true,
         ]
     ];
 
@@ -136,8 +136,8 @@ class SiteTreeLink extends SuperLinkTypeExtension
         $siteTreeField->setEmptyString('-- ' . _t(__CLASS__ . '.SelectAPage', 'Select a page') . ' --');
         $siteTreeField->setHasEmptyDefault(true);
 
-        $fields->push($siteTreeField);
         $this->getOwner()->invokeWithExtensions('updateSiteTreeField', $siteTreeField);
+        $fields->push($siteTreeField);
 
         if (!$this->getOwner()->getTypeConfigValue('allow_anchor', $type)) {
             return;
@@ -157,7 +157,7 @@ class SiteTreeLink extends SuperLinkTypeExtension
             ->setDepends($siteTreeField)
             ->setEmptyString('-- ' . _t(__CLASS__ . '.SelectAnAnchor', 'Select an anchor') . ' --');
 
-        $fields->push($anchorField);
         $this->getOwner()->invokeWithExtensions('updateAnchorField', $anchorField);
+        $fields->push($anchorField);
     }
 }
